@@ -1,0 +1,673 @@
+## Project Overview
+
+**Project Name**: SpotOn (Visual Medical Journal)
+
+**Repository**: https://github.com/non/SpotOn
+**Author**: Non <non@example.com>
+
+**Description**: SpotOn is a Visual Medical Journal iOS app designed to track skin conditions (moles, rashes, wounds) over time for multiple family members. Features a unique "Ghost Overlay" camera interface for consistent photo alignment and a "Doctor Summary" mode for progress visualization. 100% local storage with SwiftData, no cloud backend required.
+
+---
+
+## ⚠️ CRITICAL SAFETY RULES
+
+### 🚨 FORBIDDEN ACTIONS (NEVER ALLOWED)
+
+- ❌ **NEVER merge PRs yourself** - Provide PR link and wait for user instructions
+- ❌ **NEVER work on main/staging branches** - Always use feature branches
+- ❌ **NEVER delete critical files** (.env, .git/, node_modules/, package.json, lib/database/)
+- ❌ **NEVER commit sensitive data** (API keys, passwords, secrets) - Use environment variables
+- ❌ **NEVER skip 100% validation** (build, lint, test) - Must pass completely
+- ❌ **NEVER use git push --force** - Only use --force-with-lease when absolutely necessary
+- ❌ **NEVER implement without task issue** - Must use =plan command first
+
+### 📁 MANDATORY TEMPORARY FILE MANAGEMENT (CRITICAL)
+
+#### 🚨 STRICT .TMP FOLDER POLICY (NO EXCEPTIONS)
+
+- ❌ **NEVER use system temp directories** (`/tmp/`, `$TEMP`, etc.)
+- ❌ **NEVER create temporary files in project root or other folders**
+- ✅ **ALWAYS create temporary files in `.tmp/` folder ONLY**
+- ✅ **ALWAYS clean up `.tmp/` folder after each operation**
+- ✅ **ALWAYS ensure `.tmp/` folder is in `.gitignore`**
+
+#### 🎯 ENFORCED TEMPORARY FILE WORKFLOW
+
+**1. Pre-Operation Setup**:
+```bash
+# ALWAYS create .tmp folder if it doesn't exist
+mkdir -p .tmp
+# ALWAYS ensure .tmp/ is in .gitignore
+echo ".tmp/" >> .gitignore
+```
+
+**2. Temporary File Creation**:
+```bash
+# ALWAYS use project .tmp folder
+echo "content" > .tmp/temp-file.md
+# NEVER use system temp
+# echo "content" > /tmp/temp-file.md  ❌ FORBIDDEN
+```
+
+**3. Post-Operation Cleanup**:
+```bash
+# ALWAYS clean up .tmp folder after operation
+rm -rf .tmp/*
+# or for specific files
+rm .tmp/temp-file.md
+```
+
+**4. GitHub Issue Content Creation**:
+```bash
+# ALWAYS use .tmp folder for issue content drafts
+echo "Issue content" > .tmp/issue-content.md
+# Create GitHub issue using .tmp file
+gh issue create --title "Title" --body-file .tmp/issue-content.md
+# ALWAYS clean up immediately
+rm .tmp/issue-content.md
+```
+
+#### 🔍 AUTOMATIC VERIFICATION
+
+All commands MUST:
+1. Check `.tmp/` folder exists before operation
+2. Create temporary files ONLY in `.tmp/` folder
+3. Clean up `.tmp/` folder immediately after use
+4. Verify cleanup success before completion
+
+### 📋 MANDATORY WORKFLOW RULES
+
+- ✅ **ALWAYS** sync staging branch before any implementation: `git checkout staging && git pull origin staging`
+- ✅ **ALWAYS** verify task issue exists: `#[issue-number]` before `=impl`
+- ✅ **ALWAYS** use feature branch naming: `feature/task-[issue-number]-[description]`
+- ✅ **ALWAYS** ensure 100% build success before commit: `[build command]`
+- ✅ **ALWAYS** ensure 100% lint pass before commit: `[lint command]`
+- ✅ **ALWAYS** use template-guided workflow with proper context validation
+- ✅ **ALWAYS** verify code formatting: `[format command]`
+- ✅ **ALWAYS** use `.tmp/` folder for temporary files and clean up immediately after use
+- ✅ **ALWAYS** create test files in centralized `tests/` directory only
+
+---
+
+## 📊 Response Quality Standards (MANDATORY)
+
+### 1. **On-Point**
+- Answer only what was asked
+- No out-of-scope information
+- Cut unnecessary details
+
+### 2. **Good Context Ordering**
+- Simple to complex progression
+- Start with robust answer first
+- Gradually increase complexity
+- Order information for easy comprehension
+
+### 3. **Exact Details**
+- Provide accurate and specific information
+- Reference actual file, function, variable names
+- No hallucinating about code or structure
+- Verify assumptions before answering
+
+### 4. **Security-First Focus**
+- Always consider security implications
+- Recommend secure approach first
+- Warn about potential risks
+- Explain why approach is secure
+
+### 5. **Senior Developer Mindset**
+- Provide unbiased feedback
+- Answer directly and straightforwardly
+- Demonstrate expertise in domain
+- Use best practices for technology stack
+
+---
+
+## 🌐 Response Language Policy
+
+### Automatic Language Matching (MANDATORY)
+
+- **If user asks in Thai** → Respond in Thai (ยกเว้น technical terms)
+- **If user asks in English** → Respond in English
+- **Mixed language** → Follow the primary language of the question
+- **Technical terms** → Always use English (Rust, Cargo, PostgreSQL, etc.)
+
+### Examples
+
+**User (Thai)**: "ทำไม queue ถึง fail ?"
+**Agent (Thai)**: "จากการวิเคราะห์ queue system ใน `src/queue/` พบว่า..."
+
+**User (English)**: "Why is the queue failing?"
+**Agent (English)**: "After analyzing the queue system in `src/queue/`, I found..."
+
+**User (Mixed)**: "explain ว่า database connection pool ทำงานยังไง"
+**Agent (Thai)**: "Connection pool ใน database ทำงานแบบ... (code examples use English)"
+
+---
+
+## 📋 Workflow System
+
+### Template Integration
+
+**Context Issue Template** - `/docs/ISSUE-TEMP.md`:
+
+- Used for: `=fcs > [topic-name]` or `=fcs > [CONTEXT]`
+- **ALWAYS creates GitHub Issue** - Never creates local .md files
+- Creates living document for iterative discussion
+- Contains: DISCUSSION LOG, ACCUMULATED CONTEXT, PLANNING READINESS CHECKLIST
+
+**Task Issue Template** - `/docs/TASK-ISSUE-TEMP.md`:
+
+- Used for: `=plan > [task description]`
+- **ALWAYS creates GitHub Issue** - Never creates local .md files
+- Creates atomic tasks based on current mode (MANUAL/COPILOT)
+- Contains: EXECUTION MODE field, 100% validation requirements
+
+**Knowledge Issue Template** - `/docs/KNOWLEDGE-TEMP.md`:
+
+- Used for: `=kupdate [category] "[topic]"`
+- **ALWAYS creates GitHub Issue** - Never creates local .md files
+- Creates structured knowledge entries with AI honest feedback
+- Contains: Problem → Solution → Lessons Learned → Links
+
+### Mode-Based Execution System
+
+**Default Mode**: MANUAL (agent implementation)
+
+**Mode Commands**:
+
+```bash
+/mode manual     # Tasks assigned to agent (Claude)
+/mode copilot     # Tasks assigned to @copilot
+/mode status      # Show current execution mode
+```
+
+**Mode-Specific Behavior**:
+
+- **MANUAL Mode**: `/plan` creates tasks assigned to agent, `/impl` triggers agent implementation using code editing tools
+- **COPILOT Mode**: `/plan` creates tasks assigned to @copilot, `/impl` triggers copilot implementation
+
+### Core Commands
+
+**✅ NEW: Claude Code Slash Commands Implemented!**
+All workflow commands are now available as proper Claude Code slash commands (markdown files in `.claude/commands/`).
+
+```bash
+# Project Setup
+/init                          # Initialize workflow template for current project (IMPORTANT: Run first!)
+
+# Mode Management
+/mode [manual|copilot|status]  # Set or show execution mode
+
+# Analysis & Planning
+/pck [issue-number]            # Plan check - analyze task before impl
+/aud [question]                # Audit - analyze codebase and answer
+
+# Context Management
+/fcs [topic-name]              # Create new Context GitHub Issue
+/fcs list                      # Show all active Context Issues
+
+# Task Management
+/plan [task description]       # Create detailed Task GitHub Issue using docs/TASK-ISSUE-TEMP.md
+/plan2 [task description]      # Create rapid Task GitHub Issue with complexity validation
+/impl [issue-number]           # Implementation workflow for specific GitHub issue
+/impl [issue-number] [msg]     # Implementation with additional context
+/pr [feedback]                 # Create Pull Request from feature branch (to staging)
+
+# Knowledge Management
+/khub                          # 🔍 Read Knowledge Hub (MANDATORY first step)
+/kupdate [category] "[topic]"  # Create Knowledge GitHub Issue (CHECK existing numbers!)
+/klink [knowledge-issue-number] # Link knowledge entry to Knowledge Hub
+/ksync                         # Synchronize Knowledge Hub with all entries
+/ksearch "[query]"             # Search across all knowledge entries
+/krecent                       # Show last 5 knowledge updates
+/kcategory [category]          # Show knowledge for specific category
+
+# Other Commands
+/rrr [message]                 # Create daily retrospective GitHub Issue
+
+# Legacy = Commands (still supported for backward compatibility)
+=fcs > [topic-name]           # Create new Context GitHub Issue
+=plan > [task description]    # Create Task GitHub Issue
+=impl > [issue-number]        # Implementation workflow
+=khub                         # Read Knowledge Hub
+# ... (all other = commands still work)
+```
+
+### Claude Code Slash Command Features
+
+- **Proper Implementation**: Markdown files in `.claude/commands/` directory
+- **Claude Integration**: Processed and executed by Claude Code
+- **Rich Documentation**: Each command includes comprehensive usage, examples, and implementation details
+- **Error Handling**: Clear error messages and helpful suggestions
+- **Validation**: Automatic checking of prerequisites and dependencies
+- **Help System**: All commands support help via detailed documentation
+
+### Command Structure
+
+All slash commands follow this structure:
+- **Usage**: Clear syntax and parameter description
+- **Examples**: Practical usage scenarios
+- **Implementation**: Step-by-step execution details
+- **Integration**: How commands work together
+- **Error Handling**: Common issues and solutions
+- **Files**: Related files and dependencies
+
+### Template-Driven Workflow Process
+
+**🚀 Phase 0: Project Initialization** (MANDATORY for new projects)
+- `/init` → Automatically integrate workflow template into current project
+- Analyzes PRD.md (if available) or existing codebase
+- Updates all template configurations with project-specific settings
+- Sets up Git workflow and environment validation
+
+1. **Phase 1**: `/fcs [topic]` → Create initial context **GitHub Issue** (NEVER .md file)
+2. **Phase 2**: `/fcs [topic]` → Update context **GitHub Issue** iteratively
+3. **Phase 3**: Context reaches `[Ready for Planning]` status → Ready for planning
+4. **Phase 4**: `/plan [task]` OR `/plan2 [task]` → Create atomic **GitHub Issues** (NEVER .md files)
+   - `/plan`: Detailed planning with comprehensive analysis
+   - `/plan2`: Rapid planning with complexity validation
+5. **Phase 5**: `/impl [issue-number]` → Implement specific GitHub issue based on mode
+
+**💡 Enhanced Workflow with Claude Code Slash Commands:**
+- **Step 0**: Always run `/init` first when cloning template to new project
+- Use `/mode [manual|copilot]` to set execution mode
+- Commands processed by Claude Code with intelligent execution
+- Rich documentation and help built into each command
+- Comprehensive error handling and validation
+- All workflows maintain the same template-driven approach
+- Legacy `=` commands remain supported for backward compatibility
+
+### Project Integration with /init
+
+The `/init` command automatically handles project integration for both new and existing projects:
+
+**New Projects (with PRD.md)**:
+- Parses PRD.md for project requirements and technology stack
+- Auto-configures workflow commands based on specified technologies
+- Sets up project structure documentation from requirements
+
+**Existing Projects**:
+- Analyzes codebase to detect language, framework, and dependencies
+- Auto-configures appropriate build/test/lint commands
+- Updates template placeholders with detected project information
+
+**Automatic Configuration**:
+- Updates `CLAUDE.md` with project-specific settings
+- Configures command placeholders (`[build command]`, `[test command]`, etc.)
+- Sets up staging branch workflow
+- Initializes context tracking for the project
+- Validates development environment setup
+
+**Supported Technologies**:
+- **Node.js/TypeScript**: npm/yarn, React, Next.js, Express, Fastify
+- **Rust**: Cargo, Actix-web, Rocket, Axum, Tokio
+- **Python**: pip/poetry, FastAPI, Django, Flask, pytest
+- **Go**: go modules, standard build tools
+- **Custom**: Manual configuration options available
+
+### Implementation Workflow (MANDATORY)
+
+**Pre-Implementation Checklist**:
+
+1. **Staging Sync**: `git checkout staging && git pull origin staging`
+2. **Task Verification**: Confirm Task **GitHub Issue** `#[issue-number]` exists and is [TASK] type
+3. **Context Status**: Verify Context **GitHub Issue** is `[Ready for Planning]` or `[Implementation Ready]`
+4. **Environment Check**: `git status` - working directory must be clean
+
+**Implementation Steps**:
+
+1. **Create Feature Branch**: `git checkout -b feature/task-[issue-number]-[description]`
+
+2. **🔴 Red Phase (Tests First)** ⚠️ MANDATORY:
+   ```bash
+   # Create centralized test directory structure
+   mkdir -p tests/{unit,integration,fixtures}
+
+   # Write tests BEFORE code implementation in tests/ directory ONLY
+   [test command]  # Must FAIL (no implementation yet)
+   ```
+
+3. **🟢 Green Phase (Minimal Implementation)**:
+   ```bash
+   # Write minimal code to make tests pass
+   [test command]  # Must PASS
+   [build command] # Must pass
+   ```
+
+4. **🔵 Refactor Phase (Code Quality)**:
+   ```bash
+   # Improve code while keeping tests passing
+   [lint command]   # Must pass
+   [format command] # Must pass
+   ```
+
+5. **Final Validation** (100% required):
+   - **Build**: `[build command]` (zero errors/warnings)
+   - **Lint**: `[lint command]` (zero violations)
+   - **Format**: `[format command]` (consistent)
+   - **Tests**: `[test command]` (zero failures)
+   - **Type Check**: `[typecheck command]` (pass)
+
+6. **Commit & Push**:
+   ```bash
+   git add .
+   git commit -m "feat: [description] - Address #[issue-number] 🤖"
+   git push -u origin feature/task-[issue-number]-[description]
+   ```
+
+**Post-Implementation**:
+- **MANUAL**: User uses `/pr` to create pull request
+- **COPILOT**: Agent creates PR automatically
+
+### Enhanced Pull Request Process
+
+**Template Integration**:
+- If `docs/PR-TEMP.md` exists: `/pr` automatically fills template with TDD compliance, validation results, and agent context
+- If no template: `/pr` uses default structured format with multi-language support
+
+**Agent Context Preservation**:
+- **Approach Decision**: Why specific implementation was chosen
+- **Alternatives Considered**: Other approaches evaluated and rejected
+- **Knowledge Capture**: Links to `/kupdate` entries for learnings
+- **Workflow Integration**: Connections to `/plan` tasks and `/fcs` discussions
+
+**Multi-Language Validation**:
+Commands automatically detected from project configuration:
+- `[build command]` → Build validation
+- `[lint command]` → Lint validation
+- `[format command]` → Format validation
+- `[typecheck command]` → Type checking
+- `[test command]` → Test validation
+
+---
+
+## 🧠 Knowledge Management System
+
+### Knowledge Workflow Integration
+
+**Knowledge Capture Points**:
+
+- **After Implementation**: When `=impl` completes successfully, use `=kupdate` to document learnings **(auto-prompts for hub linking)**
+- **After Context Discussion**: When `=fcs` reaches key decisions, use `=kupdate` to capture insights **(auto-prompts for hub linking)**
+- **After Chat Discoveries**: When breakthrough solutions are found, use `=kupdate` to preserve knowledge **(auto-prompts for hub linking)**
+
+**Enhanced Knowledge Workflow**:
+
+1. **🔍 Pre-Creation Check**: `=khub` → Read Knowledge Hub #102 FIRST to check existing KNOW-[CATEGORY]-XXX numbers
+2. **Verify**: Check category section for existing numbers to avoid duplicates (e.g., KNOW-DEVICE-001, KNOW-DEVICE-002)
+3. **Create**: `=kupdate [category] "[topic]"` → Creates knowledge issue with next available number
+4. **Prompt**: System asks "Link to Knowledge Hub #102? (y/n)"
+5. **Link**: If "y" → Automatically runs `=klink`
+6. **Sync**: Use `=ksync` to ensure hub is fully synchronized
+7. **Discover**: All knowledge accessible through `=khub` navigation
+
+### Knowledge Categories
+
+`device` • `database` • `architecture` • `debug` • `workflow` • `frontend` • `backend`
+
+### Knowledge ID System
+
+**Format**: `KNOW-[CATEGORY]-[NUMBER]` (e.g., `KNOW-DEVICE-001`)
+
+### 🔍 Duplicate Prevention (CRITICAL)
+
+**Workflow**: `/khub` → Check existing numbers → `/kupdate` → Auto-link
+
+❌ **Wrong**: Skip `/khub` → Create duplicate ID
+✅ **Right**: `/khub` → Verify → Create correct next number
+
+### Auto-Label Creation
+
+**Auto-creates**: `knowledge-[category]` labels + generates `KNOW-[CATEGORY]-[NUMBER]` IDs
+
+### Knowledge Hub Integration
+
+**Automated Commands**:
+- **`/klink [issue-number]`** - Auto-links knowledge to hub
+- **`/ksync`** - Syncs hub with all knowledge entries
+- **`/kupdate`** - Creates issue + prompts for auto-linking
+
+**Benefits**: Auto-linking ✅ • Consistent formatting ✅ • Centralized discovery ✅
+
+### Knowledge Search & Retrieval
+
+**Search Commands**:
+```bash
+/ksearch "query"    • /kcategory device    • /krecent
+/khub               • /ksync                • /klink [number]
+```
+
+**Knowledge Entry Structure**:
+- **Problem** → **Solution** → **Lessons** → **Avoid** → **References**
+
+---
+
+## 🧪 Test-Driven Development (TDD) System
+
+### 🔴🟢🔵 Red-Green-Refactor Cycle (MANDATORY)
+
+The Red-Green-Refactor cycle is the core of Test-Driven Development workflow:
+
+#### 🔴 Red Phase (Tests First)
+- **Create test directory structure**: `mkdir -p tests/{unit,integration,fixtures,helpers}`
+- **Write failing tests** in `tests/` directory ONLY for the functionality you want to implement
+- Tests document the expected behavior before code exists
+- Run tests: `[test command]` → tests FAIL (because code doesn't exist yet)
+- **NEVER** create test files outside `tests/` directory
+
+#### 🟢 Green Phase (Minimal Implementation)
+- **Write minimal code** to make the failing tests pass
+- Don't implement extra features yet
+- Focus only on passing the tests you wrote
+- Run tests: `[test command]` → tests PASS
+
+#### 🔵 Refactor Phase (Improve Code)
+- **Refactor the code** for clarity, performance, and maintainability
+- Keep tests passing while improving code quality
+- Run tests: `[test command]` → tests still PASS
+- Run linter: `[lint command]` → zero warnings/errors
+- Run formatter: `[format command]` → consistent style
+
+### TDD Workflow Examples
+
+```bash
+# Node.js: npm test → fail → implement → pass → build → lint
+# Python: pytest → fail → implement → pass → build → lint
+# Rust: cargo test → fail → implement → pass → build → clippy
+# Go: go test → fail → implement → pass → build → lint
+```
+
+### TDD Integration
+
+**Mandatory Requirements**:
+- ✅ Tests BEFORE code (Red Phase)
+- ✅ Tests PASS after implementation (Green Phase)
+- ✅ Refactor while tests pass (Refactor Phase)
+- ✅ Red-Green-Refactor cycle for ALL implementations
+
+**Benefits**: Higher quality ✅ • Better design ✅ • Regression prevention ✅ • Living docs ✅ • Centralized organization ✅
+
+---
+
+## 🏗️ Technical Architecture
+
+### Core Stack
+**Language**: Swift 5.9+ • **Framework**: SwiftUI (MVVM) • **Database**: SwiftData • **Camera**: AVFoundation • **Minimum iOS**: iOS 17.0
+
+### Project Structure
+
+```
+SpotOn/
+├── README.md                   # Project overview and quick start
+├── docs/                       # Workflow and templates (issue/task templates)
+├── SpotOn/                     # Main iOS app bundle
+│   ├── SpotOnApp.swift         # App entry point and SwiftData configuration
+│   ├── Models/                 # SwiftData models (UserProfile, Spot, LogEntry)
+│   │   └── Models.swift        # Core data models
+│   ├── Views/                  # SwiftUI views
+│   │   ├── HomeView.swift      # Main dashboard with profile switching
+│   │   ├── SpotDetailView.swift# Spot timeline and detail view
+│   │   ├── CameraOverlayView.swift # Ghost overlay camera interface
+│   │   ├── LogEntryFormView.swift # Structured medical data input
+│   │   └── DoctorSummaryView.swift # Progress visualization for doctors
+│   ├── ViewModels/             # MVVM view models
+│   │   ├── SpotListViewModel.swift
+│   │   └── LogEntryViewModel.swift
+│   ├── Utils/                  # Helper utilities
+│   │   └── ImageManager.swift  # Local image storage management
+│   └── Resources/              # App resources (Info.plist, assets)
+├── SpotOnTests/                # ⭐ CENTRALIZED TEST DIRECTORY (MANDATORY)
+│   ├── Unit/                   # Unit tests for individual components
+│   ├── Integration/            # Integration tests for component interactions
+│   ├── Fixtures/               # Test data, mock objects, and utilities
+│   └── Helpers/                # Test utilities and common test setup
+└── .env.example                # Environment variables template
+```
+
+### Database Schema (SwiftData Models)
+
+```
+# SwiftData Models for SpotOn
+UserProfile (id: UUID, name: String, relation: String, avatarColor: String, createdAt: Date)
+    ↓ One-to-Many Relationship
+Spot (id: UUID, title: String, bodyPart: String, isActive: Bool, createdAt: Date)
+    ↓ One-to-Many Relationship
+LogEntry (id: UUID, timestamp: Date, imageFilename: String, note: String,
+         painScore: Int, hasBleeding: Bool, hasItching: Bool, isSwollen: Bool, estimatedSize: Double?)
+```
+
+### Git Branch Strategy (Staging-First Workflow)
+
+```
+main              ←─ DEVELOPER (manual merge)
+  │                └─ Production-ready code
+staging ←───────   ←─ FEATURE BRANCHES (auto PR)
+  │                └─ Integration testing
+feature/task-XXX   ←─ Development work
+```
+
+**Developer Responsibilities:**
+- Review and merge `staging → main` when ready
+- Ensure all tests pass before merging to main
+- Handle conflicts and resolve issues
+- Maintain code quality standards
+
+**Automated Workflow:**
+- Feature branches always PR to `staging`
+- Automated tests run on staging PR
+- CI/CD validates all requirements
+- Never auto-merge to main
+
+### Key Features
+
+- **Visual Medical Journal**: Track skin conditions (moles, rashes, wounds) over time
+- **Multi-Family Member Support**: Create profiles for Dad, Mom, Self, etc.
+- **Ghost Overlay Camera**: Unique "SpotOn" feature ensures consistent photo alignment
+- **Structured Medical Data**: Pain scores, symptoms (bleeding, itching, swelling), estimated size
+- **Local-First Architecture**: 100% SwiftData storage, no cloud backend required
+- **Doctor Summary Mode**: Side-by-side comparison of first vs latest images with progress stats
+- **Privacy-Focused**: All data stored locally, no internet requirement
+- **iOS Native**: SwiftUI with MVVM architecture, iOS 17.0+
+
+### Development Commands
+
+```bash
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build  # Build app
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' test    # Run tests
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' clean    # Clean build
+swift package version           # Check Swift package version
+```
+
+### Performance Metrics
+
+- **App Launch Time**: Target < 2 seconds (iOS App Store guidelines)
+- **Camera Capture**: < 1 second from tap to photo capture
+- **Image Processing**: < 3 seconds for ghost overlay generation
+- **Database Operations**: < 100ms for SwiftData queries
+- **Memory Usage**: < 50MB total app memory usage
+- **Storage**: Images stored locally, automatic cleanup with SwiftData cascade deletes
+- **Battery**: Optimized for minimal battery drain during camera operations
+
+---
+
+## 🎯 Quality Standards
+
+### Code Quality Requirements
+
+- **Swift**: Swift 5.9+ with strict type safety and nil safety
+- **SwiftData**: Proper model relationships and cascade delete rules
+- **SwiftUI**: MVVM architecture with proper separation of concerns
+- **Build**: 100% success rate before commit (zero Xcode warnings/errors)
+- **Tests**: Unit tests for data models and critical UI components
+- **Memory**: No memory leaks, proper ARC (Automatic Reference Counting)
+- **Camera**: Proper AVFoundation session management and cleanup
+- **Privacy**: All data stored locally, no network dependencies
+
+### UI/UX Quality Standards
+
+- **Response Times**: UI transitions < 300ms, immediate feedback for user actions
+- **Error Handling**: Graceful error states with clear user-friendly messages
+- **Accessibility**: VoiceOver support, dynamic type sizing, high contrast mode
+- **Input Validation**: Real-time validation for medical data forms
+- **Camera Permissions**: Clear permission requests and graceful handling of denials
+- **Image Storage**: Efficient compression and automatic cleanup with SwiftData
+
+### Performance Standards
+
+- **App Launch**: < 2 seconds startup time (iOS App Store requirement)
+- **SwiftData Queries**: < 100ms for database operations
+- **Image Loading**: < 500ms for image thumbnail loading
+- **Camera Operations**: < 1 second for photo capture
+- **UI Transitions**: < 300ms for all SwiftUI animations
+- **Memory Usage**: < 50MB total app memory footprint
+- **Storage**: Efficient image compression, automatic cleanup
+
+### Security Standards
+
+- **Local-First**: All data stored locally with SwiftData, no network dependencies
+- **Camera Permissions**: Proper Info.plist descriptions and graceful permission handling
+- **Image Storage**: Images saved to app's documents directory, not in database
+- **Data Isolation**: SwiftData relationships with proper cascade delete rules
+- **Input Validation**: Validate all medical data before persistence
+- **Privacy**: No analytics or tracking, HIPAA-friendly local storage approach
+- **File Security**: Proper file management and cleanup in documents directory
+
+### Template-Guided Quality
+
+- **Context Issues**: Complete PLANNING READINESS CHECKLIST ✅ (Always GitHub Issues)
+- **Task Issues**: 100% build/lint/test requirements mandatory (Always GitHub Issues)
+- **Mode Execution**: Follow mode-specific behavior exactly
+- **Template Consistency**: All issues follow template structures
+- **File Policy**: NEVER create local .md files for issues - ALWAYS use GitHub Issues
+
+---
+
+## 📚 Reference Materials
+
+### Templates
+
+- `/docs/ISSUE-TEMP.md` - Context Issue Template for iterative discussions
+- `/docs/TASK-ISSUE-TEMP.md` - Atomic Task Template for implementation
+- `/docs/KNOWLEDGE-TEMP.md` - Knowledge Issue Template for structured learning
+
+### Performance Metrics
+
+- **Target**: App launch time < 2 seconds (iOS App Store guidelines)
+- **Goal**: 100% offline functionality - no network dependencies
+- **Reliability**: 99.9% local data persistence with SwiftData
+- **Database**: Local SwiftData with automatic cascade relationships
+- **Storage**: Efficient local image management with automatic cleanup
+- **Cost**: $0/month - completely offline, no server costs
+
+### Security Notes
+
+- **Input Validation**: Comprehensive validation for medical data entry forms
+- **Data Protection**: Local-only storage, no network transmission of sensitive data
+- **Privacy by Design**: No analytics, tracking, or data sharing capabilities
+- **HIPAA-Friendly**: Local-first approach suitable for medical data storage
+- **Image Security**: Efficient local compression and secure file management
+- **Permission Management**: Proper camera and photo library permission handling
+
+---
+
+_This document focuses on agent-critical information for efficient workflow execution and safe development practices._
