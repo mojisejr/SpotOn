@@ -364,12 +364,30 @@ private struct ScaleButtonStyle: ButtonStyle {
 // MARK: - Preview
 
 #Preview("No Spots") {
-    NavigationView {
+    @State var isPresented = false
+
+    let userProfile = UserProfile(
+        id: UUID(),
+        name: "Test User",
+        relation: "Self",
+        avatarColor: "#FF6B6B",
+        createdAt: Date()
+    )
+
+    return NavigationView {
         EmptyStateView(
-            onAddSpot: { print("Add spot tapped") },
+            onAddSpot: {
+                isPresented = true
+            },
             onLearnMore: { print("Learn more tapped") }
         )
         .navigationTitle("SpotOn")
+        .sheet(isPresented: $isPresented) {
+            AddSpotView(
+                isPresented: $isPresented,
+                userProfile: userProfile
+            )
+        }
     }
 }
 

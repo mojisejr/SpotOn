@@ -257,8 +257,8 @@ struct HomeView: View {
                 print("Spot tapped: \(spot.title) - Navigation will be implemented in Task 2.4")
             },
             onAddSpot: {
-                // Prepare for future add spot functionality (Task 2.3)
-                print("Add spot tapped - Will be implemented in Task 2.3")
+                // Show add spot form for selected profile
+                showingAddSpot = true
             }
         )
         .accessibilityIdentifier("spotsSummarySection")

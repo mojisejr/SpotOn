@@ -206,6 +206,8 @@ extension Spot {
 // MARK: - Preview
 
 #Preview("With Spots") {
+    @State var isPresented = false
+
     // Create sample data container
     let container = try! ModelContainer(
         for: UserProfile.self, Spot.self, LogEntry.self,
@@ -261,29 +263,51 @@ extension Spot {
                 print("Spot tapped: \(spot.title)")
             },
             onAddSpot: {
-                print("Add spot tapped")
+                isPresented = true
             }
         )
         .navigationTitle("SpotOn")
+        .sheet(isPresented: $isPresented) {
+            AddSpotView(
+                isPresented: $isPresented,
+                userProfile: userProfile
+            )
+        }
     }
     .modelContainer(container)
 }
 
 #Preview("Empty State") {
+    @State var isPresented = false
+
     // Create empty container
     let container = try! ModelContainer(
         for: UserProfile.self, Spot.self, LogEntry.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
 
+    let userProfile = UserProfile(
+        id: UUID(),
+        name: "Test User",
+        relation: "Self",
+        avatarColor: "#FF6B6B",
+        createdAt: Date()
+    )
+
     return NavigationView {
         SpotListView(
-            selectedProfileId: UUID(),
+            selectedProfileId: userProfile.id,
             onAddSpot: {
-                print("Add spot tapped")
+                isPresented = true
             }
         )
         .navigationTitle("SpotOn")
+        .sheet(isPresented: $isPresented) {
+            AddSpotView(
+                isPresented: $isPresented,
+                userProfile: userProfile
+            )
+        }
     }
     .modelContainer(container)
 }
@@ -303,6 +327,8 @@ extension Spot {
 }
 
 #Preview("iPad Layout") {
+    @State var isPresented = false
+
     // Create sample data container
     let container = try! ModelContainer(
         for: UserProfile.self, Spot.self, LogEntry.self,
@@ -342,11 +368,17 @@ extension Spot {
                 print("iPad spot tapped: \(spot.title)")
             },
             onAddSpot: {
-                print("iPad add spot tapped")
+                isPresented = true
             }
         )
         .navigationTitle("SpotOn")
         .preferredColorScheme(.light)
+        .sheet(isPresented: $isPresented) {
+            AddSpotView(
+                isPresented: $isPresented,
+                userProfile: userProfile
+            )
+        }
     }
     .modelContainer(container)
 }
