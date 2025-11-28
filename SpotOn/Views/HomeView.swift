@@ -21,9 +21,6 @@ struct HomeView: View {
     /// Currently selected profile ID
     @State private var selectedProfileId: UUID?
 
-    /// Currently selected profile object (computed from selectedProfileId)
-    @State private var selectedProfile: UserProfile?
-
     /// Whether to show profile creation flow
     @State private var showingProfileCreation = false
 
@@ -140,7 +137,7 @@ struct HomeView: View {
                 Text(errorMessage ?? "An unknown error occurred")
             }
             .sheet(isPresented: $showingAddSpot) {
-                if let profile = selectedProfile {
+                if let profile = selectedUserProfile {
                     AddSpotView(
                         isPresented: $showingAddSpot,
                         userProfile: profile
@@ -159,8 +156,9 @@ struct HomeView: View {
             ProfileRowView(
                 profiles: profiles,
                 selectedProfileId: $selectedProfileId,
-                onProfileSelected: { profile in
-                    selectedProfile = profile
+                onProfileSelected: { _ in
+                    // Profile selection is handled by selectedProfileId binding
+                    // selectedUserProfile computed property will update automatically
                 }
             )
             .padding(.horizontal, contentHorizontalPadding)
@@ -395,7 +393,7 @@ struct HomeView: View {
         // Auto-select first profile if no selection exists
         if selectedProfileId == nil, let firstProfile = profiles.first {
             selectedProfileId = firstProfile.id
-            selectedProfile = firstProfile
+            // selectedUserProfile computed property will provide the profile
         }
     }
 
@@ -409,21 +407,22 @@ struct HomeView: View {
                 // Select first available profile if current selection no longer exists
                 if let firstProfile = newProfiles.first {
                     selectedProfileId = firstProfile.id
-                    selectedProfile = firstProfile
+                    // selectedUserProfile computed property will provide the profile
                 }
             }
         } else {
             // Auto-select first profile if no selection and profiles exist
             if let firstProfile = newProfiles.first {
                 selectedProfileId = firstProfile.id
-                selectedProfile = firstProfile
+                // selectedUserProfile computed property will provide the profile
             }
         }
     }
 
     /// Update selected profile when selection changes
     private func updateSelectedProfile(_ profileId: UUID?) {
-        selectedProfile = profiles.first { $0.id == profileId }
+        // selectedUserProfile computed property will provide the updated profile
+        // No additional state management needed
     }
 
     /// Handle profile creation
