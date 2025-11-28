@@ -26,7 +26,45 @@ struct ProfileRowView: View {
     private let medicalBlue = Color(red: 0.0, green: 0.48, blue: 1.0) // #007AFF
     private let backgroundColor = Color(red: 0.95, green: 0.95, blue: 0.97) // #F2F2F7
 
-    // MARK: - Computed Properties
+    // MARK: - Responsive Design Properties
+
+    /// Dynamic height based on device and card width
+    private var scrollViewHeight: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            // iPad: Taller scroll view for larger cards
+            return 200
+        } else {
+            // iPhone: Optimized height for portrait use
+            return 160
+        }
+    }
+
+    /// Dynamic horizontal spacing based on device
+    private var cardSpacing: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return 16 // More spacing on iPad for better visual separation
+        } else {
+            return 12 // Compact spacing on iPhone
+        }
+    }
+
+    /// Dynamic horizontal padding for scroll view content
+    private var scrollHorizontalPadding: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return 24 // More padding on iPad
+        } else {
+            return 20 // Standard padding on iPhone
+        }
+    }
+
+    /// Dynamic vertical padding for scroll view
+    private var scrollVerticalPadding: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return 12 // More vertical padding on iPad
+        } else {
+            return 8 // Compact padding on iPhone
+        }
+    }
 
     /// Check if any profiles exist
     private var hasProfiles: Bool {
@@ -83,15 +121,15 @@ struct ProfileRowView: View {
 
     private var profileScrollView: some View {
         ScrollView(.horizontal, showsIndicators: true) {
-            HStack(spacing: 12) {
+            HStack(spacing: cardSpacing) {
                 ForEach(Array(profiles.enumerated()), id: \.element.id) { index, profile in
                     profileCard(for: profile, at: index)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 8)
+            .padding(.horizontal, scrollHorizontalPadding)
+            .padding(.vertical, scrollVerticalPadding)
         }
-        .frame(height: 160)
+        .frame(height: scrollViewHeight)
         .background(backgroundColor.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityIdentifier("profileRowView")

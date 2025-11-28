@@ -29,6 +29,48 @@ struct ProfileCardView: View {
     private let subtitleColor = Color.secondary
     private let unselectedBorderColor = Color.gray.opacity(0.3)
 
+    // MARK: - Responsive Design Properties
+
+    /// Dynamic card width based on device and screen size
+    private var cardWidth: CGFloat {
+        let screenWidth = UIScreen.main.bounds.width
+        let scaleFactor = UIScreen.main.scale
+
+        // Base width calculation with responsive scaling
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            // iPad: Larger cards for better touch targets and readability
+            let baseWidth = min(140, screenWidth * 0.15)
+            return max(baseWidth, 120) // Minimum width for iPad
+        } else {
+            // iPhone: Compact but usable size
+            let baseWidth = min(100, screenWidth * 0.22)
+            return max(baseWidth, 80) // Minimum width for iPhone SE
+        }
+    }
+
+    /// Dynamic avatar size based on card width
+    private var avatarSize: CGFloat {
+        cardWidth * 0.64 // 64% of card width maintains proportions
+    }
+
+    /// Dynamic font sizes based on device type
+    private var titleFontSize: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 18 : 16
+    }
+
+    private var subtitleFontSize: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 14 : 12
+    }
+
+    /// Dynamic padding based on device type
+    private var horizontalPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 16 : 12
+    }
+
+    private var verticalPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 20 : 16
+    }
+
     // MARK: - Computed Properties
 
     /// Extract initials from profile name for avatar display
@@ -65,29 +107,29 @@ struct ProfileCardView: View {
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 12) {
+            VStack(spacing: cardWidth * 0.12) {
                 // Avatar Section
                 ZStack {
                     // Selection indicator ring
                     if isSelected {
                         Circle()
                             .stroke(medicalBlue, lineWidth: 4)
-                            .frame(width: 72, height: 72)
+                            .frame(width: avatarSize + 8, height: avatarSize + 8)
                             .scaleEffect(isSelected ? 1.1 : 1.0)
                     }
 
                     // Avatar background
                     Circle()
                         .fill(avatarColor)
-                        .frame(width: 64, height: 64)
+                        .frame(width: avatarSize, height: avatarSize)
                         .overlay(
                             Circle()
                                 .strokeBorder(cardBackgroundColor, lineWidth: 3)
                         )
 
-                    // Initials text
+                    // Initials text with responsive font
                     Text(initials)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
+                        .font(.system(size: avatarSize * 0.375, weight: .bold, design: .rounded)) // 37.5% of avatar size
                         .foregroundColor(.white)
                         .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
                 }
@@ -95,24 +137,24 @@ struct ProfileCardView: View {
 
                 // Profile Information
                 VStack(spacing: 4) {
-                    // Profile name
+                    // Profile name with responsive font
                     Text(displayName)
-                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .font(.system(size: titleFontSize, weight: .semibold, design: .rounded))
                         .foregroundColor(textColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
 
-                    // Profile relation
+                    // Profile relation with responsive font
                     Text(displayRelation)
-                        .font(.system(size: 12, weight: .medium, design: .default))
+                        .font(.system(size: subtitleFontSize, weight: .medium, design: .default))
                         .foregroundColor(subtitleColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 16)
-            .frame(width: 100)
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
+            .frame(width: cardWidth)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(cardBackgroundColor)

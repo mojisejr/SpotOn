@@ -37,7 +37,40 @@ struct HomeView: View {
     private let backgroundColor = Color(red: 0.95, green: 0.95, blue: 0.97) // #F2F2F7
     private let cardBackgroundColor = Color.white
 
-    // MARK: - Computed Properties
+    // MARK: - Responsive Design Properties
+
+    /// Detect if device is iPad
+    private var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+
+    /// Detect if device is in landscape orientation
+    private var isLandscape: Bool {
+        UIScreen.main.bounds.width > UIScreen.main.bounds.height
+    }
+
+    /// Responsive horizontal padding for main content
+    private var contentHorizontalPadding: CGFloat {
+        if isIPad {
+            return isLandscape ? 40 : 32 // More padding for iPad
+        } else {
+            return isLandscape ? 20 : 16 // Standard iPhone padding
+        }
+    }
+
+    /// Responsive spacing between sections
+    private var sectionSpacing: CGFloat {
+        if isIPad {
+            return isLandscape ? 32 : 24 // More spacing on iPad
+        } else {
+            return isLandscape ? 20 : 16 // Compact spacing on iPhone
+        }
+    }
+
+    /// Navigation style based on device type and orientation
+    private var shouldUseDoubleColumn: Bool {
+        isIPad && isLandscape
+    }
 
     /// Check if any profiles exist
     private var hasProfiles: Bool {
@@ -72,13 +105,13 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("SpotOn")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(isIPad && isLandscape ? .inline : .large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if hasProfiles {
                         Button(action: createProfile) {
                             Image(systemName: "plus")
-                                .font(.system(size: 18, weight: .medium))
+                                .font(.system(size: isIPad ? 20 : 18, weight: .medium))
                         }
                         .accessibilityLabel("Add new profile")
                         .accessibilityHint("Create a new user profile")
@@ -100,7 +133,7 @@ struct HomeView: View {
                 Text(errorMessage ?? "An unknown error occurred")
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle()) // For better iPad and large device support
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     // MARK: - View Components
@@ -115,11 +148,11 @@ struct HomeView: View {
                     selectedProfile = profile
                 }
             )
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .padding(.horizontal, contentHorizontalPadding)
+            .padding(.top, isIPad ? 12 : 8)
 
             Divider()
-                .padding(.vertical, 16)
+                .padding(.vertical, sectionSpacing)
                 .background(backgroundColor)
         }
     }
@@ -127,7 +160,7 @@ struct HomeView: View {
     /// Main content section showing selected profile information
     private var mainContentSection: some View {
         ScrollView {
-            VStack(spacing: 24) {
+            VStack(spacing: sectionSpacing) {
                 if let profile = selectedUserProfile {
                     // Selected profile information card
                     selectedProfileCard(profile: profile)
@@ -145,10 +178,10 @@ struct HomeView: View {
                     noProfileSelectedView
                 }
 
-                Spacer(minLength: 40)
+                Spacer(minLength: isIPad ? 60 : 40)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .padding(.horizontal, contentHorizontalPadding)
+            .padding(.top, isIPad ? 12 : 8)
         }
         .accessibilityIdentifier("homeViewMainContent")
     }
@@ -478,3 +511,4 @@ private struct QuickActionButton: View {
     HomeView()
         .modelContainer(for: UserProfile.self, inMemory: true)
 }
+
