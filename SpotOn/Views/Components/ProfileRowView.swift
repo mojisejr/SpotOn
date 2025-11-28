@@ -91,7 +91,7 @@ struct ProfileRowView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 8)
         }
-        .frame(height: 140)
+        .frame(height: 160)
         .background(backgroundColor.opacity(0.5))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityIdentifier("profileRowView")
