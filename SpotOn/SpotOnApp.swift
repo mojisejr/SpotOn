@@ -12,7 +12,10 @@ import SwiftData
 struct SpotOnApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            UserProfile.self,
+            Spot.self,
+            LogEntry.self,
+            Item.self, // Keep the existing Item model for compatibility
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +28,7 @@ struct SpotOnApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DebugDashboardView()
         }
         .modelContainer(sharedModelContainer)
     }
