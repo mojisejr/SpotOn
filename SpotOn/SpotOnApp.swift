@@ -28,7 +28,7 @@ struct SpotOnApp: App {
 
     var body: some Scene {
         WindowGroup {
-            DebugDashboardView()
+            HomeView()
         }
         .modelContainer(sharedModelContainer)
     }
