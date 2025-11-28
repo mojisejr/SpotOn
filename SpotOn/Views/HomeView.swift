@@ -235,37 +235,17 @@ struct HomeView: View {
 
     /// Spots summary section for the selected profile
     private func spotsSummarySection(profile: UserProfile) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Medical Spots")
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
-                .foregroundColor(.primary)
-                .accessibilityAddTraits(.isHeader)
-
-            // Placeholder for spots - will be implemented in future tasks
-            VStack(spacing: 12) {
-                HStack {
-                    Image(systemName: "circle.fill")
-                        .foregroundColor(medicalBlue)
-                        .font(.system(size: 12))
-
-                    Text("No spots tracked yet")
-                        .font(.system(size: 16, weight: .medium, design: .default))
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-                }
-
-                Text("Start tracking medical spots by using the camera to capture photos of moles, rashes, or wounds.")
-                    .font(.system(size: 14, weight: .regular, design: .default))
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+        SpotListView(
+            selectedProfileId: profile.id,
+            onSpotTap: { spot in
+                // Prepare for future navigation to SpotDetailView (Task 2.4)
+                print("Spot tapped: \(spot.title) - Navigation will be implemented in Task 2.4")
+            },
+            onAddSpot: {
+                // Prepare for future add spot functionality (Task 2.3)
+                print("Add spot tapped - Will be implemented in Task 2.3")
             }
-            .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(backgroundColor)
-            )
-        }
+        )
         .accessibilityIdentifier("spotsSummarySection")
     }
 
@@ -472,7 +452,6 @@ private struct QuickActionButton: View {
                     .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
             )
         }
-        .buttonStyle(ScaleButtonStyle())
         .accessibilityLabel(title)
         .accessibilityHint("Tap to \(title.lowercased())")
     }
