@@ -15,7 +15,7 @@
 
 - ❌ **NEVER merge PRs yourself** - Provide PR link and wait for user instructions
 - ❌ **NEVER work on main/staging branches** - Always use feature branches
-- ❌ **NEVER delete critical files** (.env, .git/, node_modules/, package.json, lib/database/)
+- ❌ **NEVER delete critical files** (.env, .git/, SpotOn/, SpotOnTests/, docs/, .claude/)
 - ❌ **NEVER commit sensitive data** (API keys, passwords, secrets) - Use environment variables
 - ❌ **NEVER skip 100% validation** (build, lint, test) - Must pass completely
 - ❌ **NEVER use git push --force** - Only use --force-with-lease when absolutely necessary
@@ -80,12 +80,12 @@ All commands MUST:
 - ✅ **ALWAYS** sync staging branch before any implementation: `git checkout staging && git pull origin staging`
 - ✅ **ALWAYS** verify task issue exists: `#[issue-number]` before `=impl`
 - ✅ **ALWAYS** use feature branch naming: `feature/task-[issue-number]-[description]`
-- ✅ **ALWAYS** ensure 100% build success before commit: `[build command]`
-- ✅ **ALWAYS** ensure 100% lint pass before commit: `[lint command]`
+- ✅ **ALWAYS** ensure 100% build success before commit: `xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build`
+- ✅ **ALWAYS** ensure 100% lint pass before commit: `swiftlint` (if available)
 - ✅ **ALWAYS** use template-guided workflow with proper context validation
-- ✅ **ALWAYS** verify code formatting: `[format command]`
+- ✅ **ALWAYS** verify code formatting: `swiftformat` (if available)
 - ✅ **ALWAYS** use `.tmp/` folder for temporary files and clean up immediately after use
-- ✅ **ALWAYS** create test files in centralized `tests/` directory only
+- ✅ **ALWAYS** create test files in centralized `SpotOnTests/` directory only
 
 ---
 
@@ -594,43 +594,41 @@ swift package version           # Check Swift package version
 
 ### Code Quality Requirements
 
-- **Swift**: Swift 5.9+ with strict type safety and nil safety
-- **SwiftData**: Proper model relationships and cascade delete rules
-- **SwiftUI**: MVVM architecture with proper separation of concerns
-- **Build**: 100% success rate before commit (zero Xcode warnings/errors)
-- **Tests**: Unit tests for data models and critical UI components
-- **Memory**: No memory leaks, proper ARC (Automatic Reference Counting)
-- **Camera**: Proper AVFoundation session management and cleanup
-- **Privacy**: All data stored locally, no network dependencies
+- **Rust**: Edition 2021, strict type system (eliminates entire classes of bugs)
+- **Cargo Check**: Zero compiler warnings (enforced)
+- **Clippy Lints**: Zero warnings (`cargo clippy`)
+- **Formatting**: `cargo fmt` auto-formatting, consistent across project
+- **Build**: 100% success rate before commit
+- **Tests**: Unit tests for critical paths (payments, auth)
+- **Async Safety**: No panics, proper error handling in all async contexts
 
-### UI/UX Quality Standards
+### API Quality Standards
 
-- **Response Times**: UI transitions < 300ms, immediate feedback for user actions
-- **Error Handling**: Graceful error states with clear user-friendly messages
-- **Accessibility**: VoiceOver support, dynamic type sizing, high contrast mode
-- **Input Validation**: Real-time validation for medical data forms
-- **Camera Permissions**: Clear permission requests and graceful handling of denials
-- **Image Storage**: Efficient compression and automatic cleanup with SwiftData
+- **Response Times**: p95 < 200ms for all endpoints
+- **Error Handling**: Always return structured JSON errors with status codes
+- **Rate Limiting**: Enforce per-user limits via Redis
+- **Input Validation**: Validate all user inputs before processing
+- **JWT Security**: 7-day token expiration, secure secret management
+- **HTTPS Only**: Enforce in production, automatic via Render
 
 ### Performance Standards
 
-- **App Launch**: < 2 seconds startup time (iOS App Store requirement)
-- **SwiftData Queries**: < 100ms for database operations
-- **Image Loading**: < 500ms for image thumbnail loading
-- **Camera Operations**: < 1 second for photo capture
-- **UI Transitions**: < 300ms for all SwiftUI animations
-- **Memory Usage**: < 50MB total app memory footprint
-- **Storage**: Efficient image compression, automatic cleanup
+- **Startup Time**: API ready within 10ms
+- **Database Queries**: < 50ms per query (with indexes)
+- **Redis Operations**: < 10ms per operation
+- **AI Processing**: 1-2 seconds per reading (queue-based async)
+- **Concurrent Users**: Handle 100+ concurrent connections
+- **Memory Usage**: < 10MB base memory + ~1MB per concurrent request
 
 ### Security Standards
 
-- **Local-First**: All data stored locally with SwiftData, no network dependencies
-- **Camera Permissions**: Proper Info.plist descriptions and graceful permission handling
-- **Image Storage**: Images saved to app's documents directory, not in database
-- **Data Isolation**: SwiftData relationships with proper cascade delete rules
-- **Input Validation**: Validate all medical data before persistence
-- **Privacy**: No analytics or tracking, HIPAA-friendly local storage approach
-- **File Security**: Proper file management and cleanup in documents directory
+- **Secrets Management**: Use .env, never commit sensitive data
+- **Database Access**: All queries use parameterized statements (SQLx)
+- **Authentication**: JWT tokens with proper expiration
+- **CORS**: Configured for frontend domain only
+- **Rate Limiting**: Per-user limits on sensitive endpoints
+- **Webhook Verification**: Verify Stripe webhook signatures
+- **Error Messages**: Never expose sensitive system details
 
 ### Template-Guided Quality
 
@@ -652,21 +650,21 @@ swift package version           # Check Swift package version
 
 ### Performance Metrics
 
-- **Target**: App launch time < 2 seconds (iOS App Store guidelines)
-- **Goal**: 100% offline functionality - no network dependencies
-- **Reliability**: 99.9% local data persistence with SwiftData
-- **Database**: Local SwiftData with automatic cascade relationships
-- **Storage**: Efficient local image management with automatic cleanup
-- **Cost**: $0/month - completely offline, no server costs
+- **Target**: API response time < 200ms (p95)
+- **Goal**: 99.9% uptime for Tarot reading service
+- **Reliability**: 99.99% accurate reading delivery
+- **Database**: PostgreSQL via Supabase with automatic scaling
+- **Queue**: Upstash Redis with serverless scaling
+- **Cost**: ~$50-75/month for full stack at scale
 
 ### Security Notes
 
-- **Input Validation**: Comprehensive validation for medical data entry forms
-- **Data Protection**: Local-only storage, no network transmission of sensitive data
-- **Privacy by Design**: No analytics, tracking, or data sharing capabilities
-- **HIPAA-Friendly**: Local-first approach suitable for medical data storage
-- **Image Security**: Efficient local compression and secure file management
-- **Permission Management**: Proper camera and photo library permission handling
+- **Input Validation**: Comprehensive validation for all user inputs
+- **Authentication**: LINE LIFF OAuth + JWT with 7-day expiration
+- **Data Protection**: Encrypted connections, secure token storage
+- **Access Control**: Role-based access (user, admin levels)
+- **Payment Security**: Stripe webhook verification, idempotent operations
+- **Audit Trail**: Complete logs for readings and transactions
 
 ---
 

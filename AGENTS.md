@@ -1,11 +1,11 @@
 ## Project Overview
 
-**Project Name**: [PROJECT_NAME] (Workflow Template)
+**Project Name**: SpotOn (Visual Medical Journal)
 
-**Repository**: [REPOSITORY_URL]
-**Author**: [AUTHOR_NAME] <[EMAIL]>
+**Repository**: https://github.com/non/SpotOn
+**Author**: Non <non@example.com>
 
-**Description**: Generic, reusable agent workflow and implementation template. Use this repository to document mandatory agent safety rules, workflow commands, templates, and the implementation checklist used by automated agents and developers. Replace placeholders with project-specific metadata when adapting this template.
+**Description**: SpotOn is a Visual Medical Journal iOS app designed to track skin conditions (moles, rashes, wounds) over time for multiple family members. Features a unique "Ghost Overlay" camera interface for consistent photo alignment and a "Doctor Summary" mode for progress visualization. 100% local storage with SwiftData, no cloud backend required.
 
 ---
 
@@ -15,7 +15,7 @@
 
 - ❌ **NEVER merge PRs yourself** - Provide PR link and wait for user instructions
 - ❌ **NEVER work on main/staging branches** - Always use feature branches
-- ❌ **NEVER delete critical files** (.env, .git/, node_modules/, package.json, lib/database/)
+- ❌ **NEVER delete critical files** (.env, .git/, SpotOn/, SpotOnTests/, docs/, .claude/)
 - ❌ **NEVER commit sensitive data** (API keys, passwords, secrets) - Use environment variables
 - ❌ **NEVER skip 100% validation** (build, lint, test) - Must pass completely
 - ❌ **NEVER use git push --force** - Only use --force-with-lease when absolutely necessary
@@ -80,12 +80,12 @@ All commands MUST:
 - ✅ **ALWAYS** sync staging branch before any implementation: `git checkout staging && git pull origin staging`
 - ✅ **ALWAYS** verify task issue exists: `#[issue-number]` before `=impl`
 - ✅ **ALWAYS** use feature branch naming: `feature/task-[issue-number]-[description]`
-- ✅ **ALWAYS** ensure 100% build success before commit: `[build command]`
-- ✅ **ALWAYS** ensure 100% lint pass before commit: `[lint command]`
+- ✅ **ALWAYS** ensure 100% build success before commit: `xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build`
+- ✅ **ALWAYS** ensure 100% lint pass before commit: `swiftlint` (if available)
 - ✅ **ALWAYS** use template-guided workflow with proper context validation
-- ✅ **ALWAYS** verify code formatting: `[format command]`
+- ✅ **ALWAYS** verify code formatting: `swiftformat` (if available)
 - ✅ **ALWAYS** use `.tmp/` folder for temporary files and clean up immediately after use
-- ✅ **ALWAYS** create test files in centralized `tests/` directory only
+- ✅ **ALWAYS** create test files in centralized `SpotOnTests/` directory only
 
 ---
 
@@ -492,37 +492,48 @@ The Red-Green-Refactor cycle is the core of Test-Driven Development workflow:
 ## 🏗️ Technical Architecture
 
 ### Core Stack
-**Language**: [PRIMARY_LANGUAGE] • **Framework**: [WEB_FRAMEWORK] • **Database**: [DATABASE] • **Auth**: [AUTH_METHOD] • **Deploy**: [DEPLOYMENT_PLATFORM]
+**Language**: Swift 5.9+ • **Framework**: SwiftUI (MVVM) • **Database**: SwiftData • **Camera**: AVFoundation • **Minimum iOS**: iOS 17.0
 
 ### Project Structure
 
 ```
-[project-name]/
+SpotOn/
 ├── README.md                   # Project overview and quick start
 ├── docs/                       # Workflow and templates (issue/task templates)
-├── src/                        # Source code (language-dependent)
-│   ├── main.*                  # Server or application entry point
-│   ├── config.*                # Configuration management
-│   ├── handlers/               # Request handlers / API endpoints
-│   ├── services/               # Business logic and integrations
-│   ├── models/                 # Data structures and types
-   └── db/                     # Database helpers and migrations
-├── tests/                      # ⭐ CENTRALIZED TEST DIRECTORY (MANDATORY)
-│   ├── unit/                   # Unit tests for individual components
-│   ├── integration/            # Integration tests for component interactions
-│   ├── fixtures/               # Test data, mock objects, and utilities
-│   └── helpers/                # Test utilities and common test setup
-├── migrations/                 # Database migrations (if applicable)
+├── SpotOn/                     # Main iOS app bundle
+│   ├── SpotOnApp.swift         # App entry point and SwiftData configuration
+│   ├── Models/                 # SwiftData models (UserProfile, Spot, LogEntry)
+│   │   └── Models.swift        # Core data models
+│   ├── Views/                  # SwiftUI views
+│   │   ├── HomeView.swift      # Main dashboard with profile switching
+│   │   ├── SpotDetailView.swift# Spot timeline and detail view
+│   │   ├── CameraOverlayView.swift # Ghost overlay camera interface
+│   │   ├── LogEntryFormView.swift # Structured medical data input
+│   │   └── DoctorSummaryView.swift # Progress visualization for doctors
+│   ├── ViewModels/             # MVVM view models
+│   │   ├── SpotListViewModel.swift
+│   │   └── LogEntryViewModel.swift
+│   ├── Utils/                  # Helper utilities
+│   │   └── ImageManager.swift  # Local image storage management
+│   └── Resources/              # App resources (Info.plist, assets)
+├── SpotOnTests/                # ⭐ CENTRALIZED TEST DIRECTORY (MANDATORY)
+│   ├── Unit/                   # Unit tests for individual components
+│   ├── Integration/            # Integration tests for component interactions
+│   ├── Fixtures/               # Test data, mock objects, and utilities
+│   └── Helpers/                # Test utilities and common test setup
 └── .env.example                # Environment variables template
 ```
 
-### Database Schema (example)
+### Database Schema (SwiftData Models)
 
 ```
-# Sample core tables (adapt to project needs)
-users (id, external_id, name, email, avatar, created_at)
-events (id, user_id, type, payload, created_at)
-payments (id, user_id, provider_id, amount, status, created_at)
+# SwiftData Models for SpotOn
+UserProfile (id: UUID, name: String, relation: String, avatarColor: String, createdAt: Date)
+    ↓ One-to-Many Relationship
+Spot (id: UUID, title: String, bodyPart: String, isActive: Bool, createdAt: Date)
+    ↓ One-to-Many Relationship
+LogEntry (id: UUID, timestamp: Date, imageFilename: String, note: String,
+         painScore: Int, hasBleeding: Bool, hasItching: Bool, isSwollen: Bool, estimatedSize: Double?)
 ```
 
 ### Git Branch Strategy (Staging-First Workflow)
@@ -549,33 +560,33 @@ feature/task-XXX   ←─ Development work
 
 ### Key Features
 
-- **Tarot Readings**: Question submission → AI processing (1 combined agent) → Result storage
-- **Credit System**: Stars (paid currency) + Coins (earned currency), exchangeable 100:1
-- **User Authentication**: LINE LIFF OAuth with JWT tokens
-- **Payment Processing**: Stripe integration with webhook handling
-- **Referral System**: Generate referral codes, earn coins per signup
-- **AI Engine**: Single optimized GPT-4o Mini call (combines analysis + interpretation)
-- **Queue System**: Upstash Redis for async reading processing
-- **Real-time Status**: Check reading processing status via polling or WebSocket
+- **Visual Medical Journal**: Track skin conditions (moles, rashes, wounds) over time
+- **Multi-Family Member Support**: Create profiles for Dad, Mom, Self, etc.
+- **Ghost Overlay Camera**: Unique "SpotOn" feature ensures consistent photo alignment
+- **Structured Medical Data**: Pain scores, symptoms (bleeding, itching, swelling), estimated size
+- **Local-First Architecture**: 100% SwiftData storage, no cloud backend required
+- **Doctor Summary Mode**: Side-by-side comparison of first vs latest images with progress stats
+- **Privacy-Focused**: All data stored locally, no internet requirement
+- **iOS Native**: SwiftUI with MVVM architecture, iOS 17.0+
 
 ### Development Commands
 
 ```bash
-cargo run              # Development server (default: http://localhost:8080)
-cargo build --release  # Production build (creates optimized binary)
-cargo test             # Run all tests
-cargo clippy           # Lint checks
-cargo fmt              # Code formatting
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build  # Build app
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' test    # Run tests
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' clean    # Clean build
+swift package version           # Check Swift package version
 ```
 
 ### Performance Metrics
 
-- **API Response Time**: Target < 200ms (p95)
-- **Reading Generation**: 1-2 seconds (single optimized AI call)
-- **Concurrent Connections**: 5,000+ (Actix-web capable)
-- **Memory Usage**: ~3-5MB per request (Rust efficiency)
-- **Startup Time**: ~10ms
-- **Monthly Cost**: ~$50-75 (Render + Supabase + Upstash)
+- **App Launch Time**: Target < 2 seconds (iOS App Store guidelines)
+- **Camera Capture**: < 1 second from tap to photo capture
+- **Image Processing**: < 3 seconds for ghost overlay generation
+- **Database Operations**: < 100ms for SwiftData queries
+- **Memory Usage**: < 50MB total app memory usage
+- **Storage**: Images stored locally, automatic cleanup with SwiftData cascade deletes
+- **Battery**: Optimized for minimal battery drain during camera operations
 
 ---
 
