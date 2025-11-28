@@ -492,7 +492,8 @@ The Red-Green-Refactor cycle is the core of Test-Driven Development workflow:
 ## 🏗️ Technical Architecture
 
 ### Core Stack
-**Language**: Swift 5.9+ • **Framework**: SwiftUI (MVVM) • **Database**: SwiftData • **Camera**: AVFoundation • **Minimum iOS**: iOS 17.0
+**Language**: Swift 6.2.1 • **Framework**: SwiftUI (MVVM) • **Database**: SwiftData • **Camera**: AVFoundation • **Minimum iOS**: iOS 17.0
+**Development Environment**: Xcode 26.1.1 • iOS Simulator Runtime: 26.1
 
 ### Project Structure
 
@@ -572,11 +573,18 @@ feature/task-XXX   ←─ Development work
 ### Development Commands
 
 ```bash
-xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build  # Build app
-xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' test    # Run tests
-xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' clean    # Clean build
-swift package version           # Check Swift package version
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 17' build     # Build app
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 17' test       # Run tests
+xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 17' clean      # Clean build
+swift package version                # Check Swift package version
 ```
+
+**Available Simulators** (use one of these):
+- iPhone 17 (recommended)
+- iPhone 17 Pro
+- iPhone 17 Pro Max
+- iPhone 16e
+- iPhone Air
 
 ### Performance Metrics
 

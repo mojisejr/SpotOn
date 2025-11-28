@@ -93,11 +93,11 @@ Implementation Workflow - Execute GitHub issue implementation based on current m
    ✅ Test files must be created in SpotOnTests/ directory ONLY (Centralized organization)
    ✅ Test coverage must be comprehensive for new/modified code
    ✅ Tests must PASS (Green Phase complete)
-   xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build  # Build validation
+   xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 17' build  # Build validation
    swiftlint      # Lint validation (if available)
-   xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' build  # Type check validation
+   xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 17' build  # Type check validation
    swiftformat    # Format validation (if available)
-   xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 15' test      # Test validation (MANDATORY)
+   xcodebuild -scheme SpotOn -destination 'platform=iOS Simulator,name=iPhone 17' test      # Test validation (MANDATORY)
    ```
 
 ## 🔴🟢🔵 Red-Green-Refactor Cycle (TDD)
