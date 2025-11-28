@@ -27,6 +27,9 @@ struct HomeView: View {
     /// Whether to show profile creation flow
     @State private var showingProfileCreation = false
 
+    /// Whether to show add spot form
+    @State private var showingAddSpot = false
+
     /// Error state handling
     @State private var errorMessage: String?
     @State private var showingError = false
@@ -45,8 +48,12 @@ struct HomeView: View {
     }
 
     /// Detect if device is in landscape orientation
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private var isLandscape: Bool {
-        UIScreen.main.bounds.width > UIScreen.main.bounds.height
+        // Use environment-based detection instead of deprecated UIScreen.main
+        horizontalSizeClass == .regular && verticalSizeClass == .compact
     }
 
     /// Responsive horizontal padding for main content
@@ -131,6 +138,14 @@ struct HomeView: View {
                 Button("OK", role: .cancel) { }
             } message: {
                 Text(errorMessage ?? "An unknown error occurred")
+            }
+            .sheet(isPresented: $showingAddSpot) {
+                if let profile = selectedProfile {
+                    AddSpotView(
+                        isPresented: $showingAddSpot,
+                        userProfile: profile
+                    )
+                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
@@ -303,8 +318,7 @@ struct HomeView: View {
                     icon: "plus.circle.fill",
                     color: medicalBlue,
                     action: {
-                        // Will be implemented in future tasks
-                        print("Add spot tapped for \(profile.name)")
+                        showingAddSpot = true
                     }
                 )
 
@@ -454,6 +468,7 @@ private struct QuickActionButton: View {
         }
         .accessibilityLabel(title)
         .accessibilityHint("Tap to \(title.lowercased())")
+        .accessibilityIdentifier("quickActionButton_\(title.replacingOccurrences(of: " ", with: "_"))")
     }
 }
 
