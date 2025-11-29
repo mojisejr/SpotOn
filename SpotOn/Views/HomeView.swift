@@ -21,11 +21,11 @@ struct HomeView: View {
     /// Currently selected profile ID
     @State private var selectedProfileId: UUID?
 
-    /// Currently selected profile object (computed from selectedProfileId)
-    @State private var selectedProfile: UserProfile?
-
     /// Whether to show profile creation flow
     @State private var showingProfileCreation = false
+
+    /// Whether to show add spot form
+    @State private var showingAddSpot = false
 
     /// Error state handling
     @State private var errorMessage: String?
@@ -45,8 +45,12 @@ struct HomeView: View {
     }
 
     /// Detect if device is in landscape orientation
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
+
     private var isLandscape: Bool {
-        UIScreen.main.bounds.width > UIScreen.main.bounds.height
+        // Use environment-based detection instead of deprecated UIScreen.main
+        horizontalSizeClass == .regular && verticalSizeClass == .compact
     }
 
     /// Responsive horizontal padding for main content
@@ -132,6 +136,14 @@ struct HomeView: View {
             } message: {
                 Text(errorMessage ?? "An unknown error occurred")
             }
+            .sheet(isPresented: $showingAddSpot) {
+                if let profile = selectedUserProfile {
+                    AddSpotView(
+                        isPresented: $showingAddSpot,
+                        userProfile: profile
+                    )
+                }
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
@@ -144,8 +156,9 @@ struct HomeView: View {
             ProfileRowView(
                 profiles: profiles,
                 selectedProfileId: $selectedProfileId,
-                onProfileSelected: { profile in
-                    selectedProfile = profile
+                onProfileSelected: { _ in
+                    // Profile selection is handled by selectedProfileId binding
+                    // selectedUserProfile computed property will update automatically
                 }
             )
             .padding(.horizontal, contentHorizontalPadding)
@@ -242,8 +255,8 @@ struct HomeView: View {
                 print("Spot tapped: \(spot.title) - Navigation will be implemented in Task 2.4")
             },
             onAddSpot: {
-                // Prepare for future add spot functionality (Task 2.3)
-                print("Add spot tapped - Will be implemented in Task 2.3")
+                // Show add spot form for selected profile
+                showingAddSpot = true
             }
         )
         .accessibilityIdentifier("spotsSummarySection")
@@ -303,8 +316,7 @@ struct HomeView: View {
                     icon: "plus.circle.fill",
                     color: medicalBlue,
                     action: {
-                        // Will be implemented in future tasks
-                        print("Add spot tapped for \(profile.name)")
+                        showingAddSpot = true
                     }
                 )
 
@@ -381,7 +393,7 @@ struct HomeView: View {
         // Auto-select first profile if no selection exists
         if selectedProfileId == nil, let firstProfile = profiles.first {
             selectedProfileId = firstProfile.id
-            selectedProfile = firstProfile
+            // selectedUserProfile computed property will provide the profile
         }
     }
 
@@ -395,21 +407,22 @@ struct HomeView: View {
                 // Select first available profile if current selection no longer exists
                 if let firstProfile = newProfiles.first {
                     selectedProfileId = firstProfile.id
-                    selectedProfile = firstProfile
+                    // selectedUserProfile computed property will provide the profile
                 }
             }
         } else {
             // Auto-select first profile if no selection and profiles exist
             if let firstProfile = newProfiles.first {
                 selectedProfileId = firstProfile.id
-                selectedProfile = firstProfile
+                // selectedUserProfile computed property will provide the profile
             }
         }
     }
 
     /// Update selected profile when selection changes
     private func updateSelectedProfile(_ profileId: UUID?) {
-        selectedProfile = profiles.first { $0.id == profileId }
+        // selectedUserProfile computed property will provide the updated profile
+        // No additional state management needed
     }
 
     /// Handle profile creation
@@ -454,6 +467,7 @@ private struct QuickActionButton: View {
         }
         .accessibilityLabel(title)
         .accessibilityHint("Tap to \(title.lowercased())")
+        .accessibilityIdentifier("quickActionButton_\(title.replacingOccurrences(of: " ", with: "_"))")
     }
 }
 
