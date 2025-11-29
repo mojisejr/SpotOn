@@ -153,6 +153,9 @@ struct HomeView: View {
                 }
                 .navigationViewStyle(StackNavigationViewStyle())
             }
+            .sheet(isPresented: $showingProfileCreation) {
+                ProfileCreationView()
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
@@ -436,10 +439,7 @@ struct HomeView: View {
 
     /// Handle profile creation
     private func createProfile() {
-        // TODO: Implement profile creation flow
-        // This will be implemented in a future task
         showingProfileCreation = true
-        print("Profile creation requested - will be implemented in future task")
     }
 }
 
