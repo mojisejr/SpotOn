@@ -40,7 +40,7 @@ final class UserProfile {
 // MARK: - Spot Model
 
 @Model
-final class Spot {
+final class Spot: Identifiable {
     var id: UUID
     var title: String
     var bodyPart: String

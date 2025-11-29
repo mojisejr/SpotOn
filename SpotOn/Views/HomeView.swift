@@ -27,6 +27,9 @@ struct HomeView: View {
     /// Whether to show add spot form
     @State private var showingAddSpot = false
 
+    /// Currently selected spot for navigation to SpotDetailView
+    @State private var selectedSpot: Spot?
+
     /// Error state handling
     @State private var errorMessage: String?
     @State private var showingError = false
@@ -144,6 +147,12 @@ struct HomeView: View {
                     )
                 }
             }
+            .sheet(item: $selectedSpot) { spot in
+                NavigationView {
+                    SpotDetailView(spot: spot)
+                }
+                .navigationViewStyle(StackNavigationViewStyle())
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
@@ -251,8 +260,8 @@ struct HomeView: View {
         SpotListView(
             selectedProfileId: profile.id,
             onSpotTap: { spot in
-                // Prepare for future navigation to SpotDetailView (Task 2.4)
-                print("Spot tapped: \(spot.title) - Navigation will be implemented in Task 2.4")
+                // Navigate to SpotDetailView (Task 2.4 implementation)
+                selectedSpot = spot
             },
             onAddSpot: {
                 // Show add spot form for selected profile
