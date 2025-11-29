@@ -19,6 +19,9 @@ struct SpotDetailView: View {
     /// Navigation path environment
     @Environment(\.dismiss) private var dismiss
 
+    /// State for showing Add Log Entry sheet
+    @State private var showingAddLogEntry = false
+
     // MARK: - Medical Theme Colors
 
     private let medicalBlue = Color(red: 0.0, green: 0.48, blue: 1.0) // #007AFF
@@ -86,9 +89,24 @@ struct SpotDetailView: View {
                     }
                     .foregroundColor(medicalBlue)
                 }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showingAddLogEntry = true
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(medicalBlue)
+                    }
+                    .accessibilityLabel("Add Log Entry")
+                    .accessibilityHint("Create a new medical log entry for this spot")
+                }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .sheet(isPresented: $showingAddLogEntry) {
+            AddLogEntryView(spot: spot)
+        }
         .accessibilityIdentifier("spotDetailView")
     }
 
