@@ -237,7 +237,17 @@ class CameraManager: ObservableObject {
 
             // Capture photo
             let settings = AVCapturePhotoSettings()
-            photoOutput?.capturePhoto(with: settings, delegate: PhotoCaptureDelegate(completion: photoCaptureCompletion!))
+
+            // Store completion handler
+            guard let completion = photoCaptureCompletion else {
+                print("❌ [CameraManager.capturePhoto] photoCaptureCompletion is nil")
+                continuation.resume(throwing: CameraError.captureFailed)
+                return
+            }
+
+            print("🔍 [CameraManager.capturePhoto] About to call photoOutput.capturePhoto")
+            photoOutput?.capturePhoto(with: settings, delegate: PhotoCaptureDelegate(completion: completion))
+            print("🔍 [CameraManager.capturePhoto] photoOutput.capturePhoto called successfully")
         }
     }
 
