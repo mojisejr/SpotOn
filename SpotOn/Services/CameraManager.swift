@@ -238,8 +238,7 @@ class CameraManager: ObservableObject {
 
             // Capture photo
             let settings = AVCapturePhotoSettings()
-            settings.isHighResolutionPhotoEnabled = false
-            settings.maxPhotoDimensions = CMVideoDimensions(width: 1920, height: 1080)
+            print("🔍 [CameraManager.capturePhoto] Using default photo settings - let AVFoundation handle dimensions")
 
             photoOutput?.capturePhoto(with: settings, delegate: PhotoCaptureDelegate(completion: photoCaptureCompletion!))
         }
