@@ -84,13 +84,10 @@ class CameraManager: ObservableObject {
 
     /// Initialize camera for photo capture
     /// Throws error if camera cannot be initialized
+    @MainActor
     func initializeCamera() async throws {
         // Check permission first
-        let hasPermission = await withCheckedContinuation { continuation in
-            checkCameraPermission { granted in
-                continuation.resume(returning: granted)
-            }
-        }
+        let hasPermission = await checkCameraPermissionAsync()
 
         guard hasPermission else {
             throw CameraError.permissionRequired
@@ -100,48 +97,105 @@ class CameraManager: ObservableObject {
         await setupCaptureSession()
     }
 
+    /// Async camera permission check for better thread safety
+    private func checkCameraPermissionAsync() async -> Bool {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            return true
+        case .notDetermined:
+            return await requestCameraPermissionAsync()
+        case .denied, .restricted:
+            await MainActor.run {
+                self.lastError = CameraError.permissionDenied
+            }
+            return false
+        @unknown default:
+            await MainActor.run {
+                self.lastError = CameraError.permissionUnknown
+            }
+            return false
+        }
+    }
+
+    /// Async camera permission request
+    private func requestCameraPermissionAsync() async -> Bool {
+        return await withCheckedContinuation { continuation in
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                continuation.resume(returning: granted)
+            }
+        }
+    }
+
     /// Setup the AVFoundation capture session
+    @MainActor
     private func setupCaptureSession() async {
+        print("🔍 [CameraManager.setupCaptureSession] START")
         do {
+            print("🔍 [CameraManager.setupCaptureSession] Creating AVCaptureSession")
             let session = AVCaptureSession()
             session.sessionPreset = .photo
+            print("🔍 [CameraManager.setupCaptureSession] Session created with preset: .photo")
 
             // Get back camera device
+            print("🔍 [CameraManager.setupCaptureSession] Looking for back camera device")
             guard let device = AVCaptureDevice.DiscoverySession(
                 deviceTypes: [.builtInWideAngleCamera],
                 mediaType: .video,
                 position: .back
             ).devices.first else {
-                lastError = CameraError.cameraUnavailable
+                print("❌ [CameraManager.setupCaptureSession] No back camera found")
+                await MainActor.run {
+                    self.lastError = CameraError.cameraUnavailable
+                }
                 return
             }
+            print("🔍 [CameraManager.setupCaptureSession] Found back camera device: \(device.localizedName)")
 
             // Setup input
+            print("🔍 [CameraManager.setupCaptureSession] Creating device input")
             let input = try AVCaptureDeviceInput(device: device)
+            print("🔍 [CameraManager.setupCaptureSession] Device input created successfully")
 
             // Setup output
+            print("🔍 [CameraManager.setupCaptureSession] Creating photo output")
             let output = AVCapturePhotoOutput()
+            print("🔍 [CameraManager.setupCaptureSession] Photo output created successfully")
 
             // Configure session
+            print("🔍 [CameraManager.setupCaptureSession] Checking if session can add input/output")
             if session.canAddInput(input) && session.canAddOutput(output) {
+                print("🔍 [CameraManager.setupCaptureSession] Adding input to session")
                 session.addInput(input)
+                print("🔍 [CameraManager.setupCaptureSession] Adding output to session")
                 session.addOutput(output)
 
                 // Store references
-                self.captureSession = session
-                self.captureDevice = device
-                self.photoOutput = output
-                self.isInitialized = true
-                self.lastError = nil
+                await MainActor.run {
+                    self.captureSession = session
+                    self.captureDevice = device
+                    self.photoOutput = output
+                    self.isInitialized = true
+                    self.lastError = nil
+                }
+                print("🔍 [CameraManager.setupCaptureSession] Session configured successfully")
 
                 // Start session - CRITICAL: AVFoundation must run on main thread
+                print("🔍 [CameraManager.setupCaptureSession] Starting session - CRITICAL MAIN THREAD")
                 session.startRunning()
+                print("🔍 [CameraManager.setupCaptureSession] Session started successfully")
             } else {
-                lastError = CameraError.configurationFailed
+                print("❌ [CameraManager.setupCaptureSession] Cannot add input/output to session")
+                await MainActor.run {
+                    self.lastError = CameraError.configurationFailed
+                }
             }
         } catch {
-            lastError = CameraError.configurationFailed
+            print("❌ [CameraManager.setupCaptureSession] Error: \(error.localizedDescription)")
+            await MainActor.run {
+                self.lastError = CameraError.configurationFailed
+            }
         }
+        print("🔍 [CameraManager.setupCaptureSession] END")
     }
 
     // MARK: - Photo Capture
