@@ -201,7 +201,9 @@ struct CameraOverlayView: View {
             }
         }
         .onChange(of: cameraManager.capturedImage) { _, newImage in
+            print("🔍 [CameraOverlayView] capturedImage changed: \(newImage != nil)")
             if let image = newImage {
+                print("✅ [CameraOverlayView] Image captured successfully, showing LogEntry form")
                 capturedImage = image
                 onPhotoCaptured?(image)
                 showingLogEntryForm = true
