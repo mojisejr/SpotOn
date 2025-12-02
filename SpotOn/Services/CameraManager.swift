@@ -219,19 +219,25 @@ class CameraManager: ObservableObject {
             lastError = nil
 
             photoCaptureCompletion = { [weak self] image, error in
-                DispatchQueue.main.async {
-                    self?.isCapturingPhoto = false
-                    self?.activeCaptureDelegate = nil // Clear delegate reference
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    print("🔍 [CameraManager] photoCaptureCompletion called with image: \(image != nil)")
+                    self.isCapturingPhoto = false
+                    self.activeCaptureDelegate = nil // Clear delegate reference
 
                     if let error = error {
-                        self?.lastError = error
+                        print("❌ [CameraManager] Photo capture completion error: \(error.localizedDescription)")
+                        self.lastError = error
                         continuation.resume(throwing: error)
                     } else if let image = image {
-                        self?.capturedImage = image
-                        self?.lastError = nil
+                        print("✅ [CameraManager] Setting capturedImage property, size: \(image.size)")
+                        self.capturedImage = image
+                        self.lastError = nil
+                        print("✅ [CameraManager] capturedImage property set successfully, calling continuation.resume()")
                         continuation.resume()
                     } else {
-                        self?.lastError = CameraError.captureFailed
+                        print("❌ [CameraManager] No image and no error - capture failed")
+                        self.lastError = CameraError.captureFailed
                         continuation.resume(throwing: CameraError.captureFailed)
                     }
                 }
