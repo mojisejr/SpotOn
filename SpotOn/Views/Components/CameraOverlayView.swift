@@ -226,14 +226,13 @@ struct CameraOverlayView: View {
 
     // MARK: - Camera Actions
 
+    @MainActor
     private func initializeCamera() {
-        Task {
+        Task { @MainActor in
             do {
                 try await cameraManager.initializeCamera()
             } catch {
-                await MainActor.run {
-                    cameraManager.lastError = error
-                }
+                cameraManager.lastError = error
             }
         }
     }
@@ -258,6 +257,7 @@ struct CameraOverlayView: View {
         }
     }
 
+    @MainActor
     private func loadPreviousImage() {
         // Get the most recent log entry for this spot
         let logEntries = spot.logEntries.sorted(by: { $0.timestamp > $1.timestamp })
@@ -266,12 +266,17 @@ struct CameraOverlayView: View {
             return
         }
 
-        // Load the previous image for ghost overlay
-        do {
-            previousImage = try imageManager.loadImage(filename: mostRecentEntry.imageFilename)
-        } catch {
-            // If we can't load the previous image, continue without overlay
-            print("Failed to load previous image: \(error)")
+        // Load image ใน background แต่อัพเดท UI บน main thread
+        Task {
+            do {
+                let image = try imageManager.loadImage(filename: mostRecentEntry.imageFilename)
+                await MainActor.run {
+                    previousImage = image
+                }
+            } catch {
+                // If we can't load the previous image, continue without overlay
+                print("Failed to load previous image: \(error)")
+            }
         }
     }
 
@@ -284,6 +289,7 @@ struct CameraOverlayView: View {
 
 // MARK: - Camera Preview View
 
+@MainActor
 private struct CameraPreviewView: UIViewRepresentable {
 
     let cameraManager: CameraManager
@@ -444,6 +450,7 @@ private struct LogEntryFormView: View {
         .allowsHitTesting(false)
     }
 
+    @MainActor
     private func saveLogEntry() {
         guard !medicalNote.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = "Please fill in the medical note field"
@@ -453,7 +460,7 @@ private struct LogEntryFormView: View {
 
         isSaving = true
 
-        Task {
+        Task { @MainActor in
             do {
                 _ = try await cameraManager.createLogEntry(
                     spot: spot,
@@ -465,20 +472,15 @@ private struct LogEntryFormView: View {
                     estimatedSize: parsedEstimatedSize
                 )
 
-                await MainActor.run {
-                    dismiss()
-                    // The LogEntry is automatically saved to SwiftData in createLogEntry
-                }
+                // dismiss() ทำบน main actor แล้ว ไม่ต้อง MainActor.run
+                dismiss()
+                // The LogEntry is automatically saved to SwiftData in createLogEntry
             } catch {
-                await MainActor.run {
-                    errorMessage = "Failed to save log entry: \(error.localizedDescription)"
-                    showingErrorAlert = true
-                }
+                errorMessage = "Failed to save log entry: \(error.localizedDescription)"
+                showingErrorAlert = true
             }
 
-            await MainActor.run {
-                isSaving = false
-            }
+            isSaving = false
         }
     }
 }
