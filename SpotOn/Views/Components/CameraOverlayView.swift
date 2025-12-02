@@ -245,9 +245,13 @@ struct CameraOverlayView: View {
     }
 
     private func capturePhoto() async {
+        print("🔍 [CameraOverlayView.capturePhoto] CAPTURE BUTTON PRESSED - Starting capture process")
         do {
+            print("🔍 [CameraOverlayView.capturePhoto] About to call cameraManager.capturePhoto()")
             try await cameraManager.capturePhoto()
+            print("✅ [CameraOverlayView.capturePhoto] cameraManager.capturePhoto() completed successfully")
         } catch {
+            print("❌ [CameraOverlayView.capturePhoto] Capture failed: \(error.localizedDescription)")
             await MainActor.run {
                 cameraManager.lastError = error
             }
