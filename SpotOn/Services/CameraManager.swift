@@ -217,7 +217,6 @@ class CameraManager: ObservableObject {
             isCapturingPhoto = true
             lastError = nil
 
-            // Setup photo capture completion
             photoCaptureCompletion = { image, error in
                 DispatchQueue.main.async {
                     self.isCapturingPhoto = false
@@ -238,8 +237,6 @@ class CameraManager: ObservableObject {
 
             // Capture photo
             let settings = AVCapturePhotoSettings()
-            print("🔍 [CameraManager.capturePhoto] Using default photo settings - let AVFoundation handle dimensions")
-
             photoOutput?.capturePhoto(with: settings, delegate: PhotoCaptureDelegate(completion: photoCaptureCompletion!))
         }
     }
@@ -437,20 +434,40 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
 
     init(completion: @escaping (UIImage?, Error?) -> Void) {
         self.completion = completion
+        print("🔍 [PhotoCaptureDelegate] Initialized with completion handler")
     }
 
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
+        print("🔍 [PhotoCaptureDelegate] didFinishProcessingPhoto called")
+
         if let error = error {
+            print("❌ [PhotoCaptureDelegate] Error processing photo: \(error.localizedDescription)")
             completion(nil, error)
             return
         }
 
-        guard let imageData = photo.fileDataRepresentation(),
-              let image = UIImage(data: imageData) else {
+        print("🔍 [PhotoCaptureDelegate] Photo processing successful, extracting image data")
+        guard let imageData = photo.fileDataRepresentation() else {
+            print("❌ [PhotoCaptureDelegate] Failed to get image data representation")
             completion(nil, CameraError.captureFailed)
             return
         }
 
+        guard let image = UIImage(data: imageData) else {
+            print("❌ [PhotoCaptureDelegate] Failed to create UIImage from data")
+            completion(nil, CameraError.captureFailed)
+            return
+        }
+
+        print("✅ [PhotoCaptureDelegate] Successfully created UIImage, size: \(image.size)")
         completion(image, nil)
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, willBeginCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        print("🔍 [PhotoCaptureDelegate] willBeginCapture called")
+    }
+
+    func photoOutput(_ output: AVCapturePhotoOutput, didCapturePhotoFor resolvedSettings: AVCaptureResolvedPhotoSettings) {
+        print("🔍 [PhotoCaptureDelegate] didCapturePhoto called")
     }
 }
