@@ -102,8 +102,6 @@ class CameraManager: ObservableObject {
 
     /// Setup the AVFoundation capture session
     private func setupCaptureSession() async {
-        print("🔍 [CameraManager.setupCaptureSession] START - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-
         do {
             let session = AVCaptureSession()
             session.sessionPreset = .photo
@@ -114,10 +112,7 @@ class CameraManager: ObservableObject {
                 mediaType: .video,
                 position: .back
             ).devices.first else {
-                print("❌ [CameraManager.setupCaptureSession] No camera device available")
-                await MainActor.run {
-                    lastError = CameraError.cameraUnavailable
-                }
+                lastError = CameraError.cameraUnavailable
                 return
             }
 
@@ -132,9 +127,7 @@ class CameraManager: ObservableObject {
                 session.addInput(input)
                 session.addOutput(output)
 
-                // Store references - ensure thread safety
-            await MainActor.run {
-                print("🔍 [CameraManager.setupCaptureSession] Storing references on main thread")
+                // Store references
                 self.captureSession = session
                 self.captureDevice = device
                 self.photoOutput = output
@@ -142,21 +135,12 @@ class CameraManager: ObservableObject {
                 self.lastError = nil
 
                 // Start session - CRITICAL: AVFoundation must run on main thread
-                print("🔍 [CameraManager.setupCaptureSession] Starting session on main thread")
                 session.startRunning()
-                print("✅ [CameraManager.setupCaptureSession] Session started successfully")
-            }
-        } else {
-            print("❌ [CameraManager.setupCaptureSession] Failed to add input")
-            await MainActor.run {
+            } else {
                 lastError = CameraError.configurationFailed
             }
-        }
         } catch {
-            print("❌ [CameraManager.setupCaptureSession] Configuration error: \(error.localizedDescription)")
-            await MainActor.run {
-                lastError = CameraError.configurationFailed
-            }
+            lastError = CameraError.configurationFailed
         }
     }
 
@@ -165,41 +149,31 @@ class CameraManager: ObservableObject {
     /// Capture a photo using the camera
     /// Throws error if camera is not initialized or capture fails
     func capturePhoto() async throws {
-        print("🔍 [CameraManager.capturePhoto] START - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-
         guard isInitialized else {
-            print("❌ [CameraManager.capturePhoto] Camera not initialized")
             throw CameraError.notInitialized
         }
 
         guard !isCapturingPhoto else {
-            print("❌ [CameraManager.capturePhoto] Capture already in progress")
             throw CameraError.captureInProgress
         }
 
         return try await withCheckedThrowingContinuation { continuation in
-            print("🔍 [CameraManager.capturePhoto] Setting up continuation - Thread: \(Thread.isMainThread ? "MAIN" : "BACKGROUND")")
             isCapturingPhoto = true
             lastError = nil
 
             // Setup photo capture completion
             photoCaptureCompletion = { image, error in
-                print("🔍 [CameraManager.photoCaptureCompletion] Callback - Thread: \(Thread.isMainThread ? "MAIN" : "BACKGROUND")")
                 DispatchQueue.main.async {
-                    print("🔍 [CameraManager.photoCaptureCompletion] Main async block - Thread: \(Thread.isMainThread ? "MAIN" : "BACKGROUND")")
                     self.isCapturingPhoto = false
 
                     if let error = error {
-                        print("❌ [CameraManager.photoCaptureCompletion] Error: \(error.localizedDescription)")
                         self.lastError = error
                         continuation.resume(throwing: error)
                     } else if let image = image {
-                        print("✅ [CameraManager.photoCaptureCompletion] Success - Image captured")
                         self.capturedImage = image
                         self.lastError = nil
                         continuation.resume()
                     } else {
-                        print("❌ [CameraManager.photoCaptureCompletion] No image captured")
                         self.lastError = CameraError.captureFailed
                         continuation.resume(throwing: CameraError.captureFailed)
                     }
@@ -210,12 +184,8 @@ class CameraManager: ObservableObject {
             let settings = AVCapturePhotoSettings()
             settings.isHighResolutionPhotoEnabled = true
 
-            print("🔍 [CameraManager.capturePhoto] About to call capturePhoto - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
             photoOutput?.capturePhoto(with: settings, delegate: PhotoCaptureDelegate(completion: photoCaptureCompletion!))
-            print("🔍 [CameraManager.capturePhoto] capturePhoto called - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
         }
-
-        print("✅ [CameraManager.capturePhoto] COMPLETED - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
     }
 
     /// Create a LogEntry with the captured image
@@ -323,31 +293,18 @@ class CameraManager: ObservableObject {
     /// Get preview layer for camera display
     /// - Returns: AVCaptureVideoPreviewLayer configured with current session
     func getPreviewLayer() -> AVCaptureVideoPreviewLayer? {
-        print("🔍 [CameraManager.getPreviewLayer] START - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-
-        guard let session = captureSession else {
-            print("❌ [CameraManager.getPreviewLayer] No session available")
-            return nil
-        }
+        guard let session = captureSession else { return nil }
 
         let layer = AVCaptureVideoPreviewLayer(session: session)
         layer.videoGravity = .resizeAspectFill
         previewLayer = layer
-
-        print("✅ [CameraManager.getPreviewLayer] Success - Layer created on thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
         return layer
     }
 
     /// Update preview layer bounds
     /// - Parameter bounds: New bounds for the preview layer
     func updatePreviewLayer(bounds: CGRect) {
-        print("🔍 [CameraManager.updatePreviewLayer] Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-
-        // CRITICAL: Force preview layer updates to main thread
-        DispatchQueue.main.async {
-            print("🔍 [CameraManager.updatePreviewLayer] Main async block - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-            self.previewLayer?.frame = bounds
-        }
+        previewLayer?.frame = bounds
     }
 
     // MARK: - Cleanup
@@ -427,27 +384,17 @@ private class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     }
 
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        print("🔍 [PhotoCaptureDelegate.photoOutput] START - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-
-        // CRITICAL: Force completion callback to main thread
-        DispatchQueue.main.async {
-            print("🔍 [PhotoCaptureDelegate.photoOutput] Main async block - Thread: \(Task.currentPriority != nil ? "MAIN" : "BACKGROUND")")
-
-            if let error = error {
-                print("❌ [PhotoCaptureDelegate.photoOutput] Error: \(error.localizedDescription)")
-                self.completion(nil, error)
-                return
-            }
-
-            guard let imageData = photo.fileDataRepresentation(),
-                  let image = UIImage(data: imageData) else {
-                print("❌ [PhotoCaptureDelegate.photoOutput] Failed to process image data")
-                self.completion(nil, CameraError.captureFailed)
-                return
-            }
-
-            print("✅ [PhotoCaptureDelegate.photoOutput] Success - Image processed on main thread")
-            self.completion(image, nil)
+        if let error = error {
+            completion(nil, error)
+            return
         }
+
+        guard let imageData = photo.fileDataRepresentation(),
+              let image = UIImage(data: imageData) else {
+            completion(nil, CameraError.captureFailed)
+            return
+        }
+
+        completion(image, nil)
     }
 }

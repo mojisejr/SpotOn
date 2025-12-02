@@ -173,8 +173,10 @@ struct CameraOverlayView: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
+            print("🔍 [CameraOverlayView] onAppear - START")
             loadPreviousImage()
             initializeCamera()
+            print("🔍 [CameraOverlayView] onAppear - END")
         }
         .onDisappear {
             cameraManager.stopCamera()
@@ -228,13 +230,18 @@ struct CameraOverlayView: View {
 
     @MainActor
     private func initializeCamera() {
+        print("🔍 [CameraOverlayView.initializeCamera] START")
         Task { @MainActor in
+            print("🔍 [CameraOverlayView.initializeCamera] About to call cameraManager.initializeCamera")
             do {
                 try await cameraManager.initializeCamera()
+                print("🔍 [CameraOverlayView.initializeCamera] initializeCamera SUCCESS")
             } catch {
+                print("❌ [CameraOverlayView.initializeCamera] ERROR: \(error.localizedDescription)")
                 cameraManager.lastError = error
             }
         }
+        print("🔍 [CameraOverlayView.initializeCamera] END")
     }
 
     private func capturePhoto() async {
