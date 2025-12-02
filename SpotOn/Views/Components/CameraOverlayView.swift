@@ -298,19 +298,23 @@ private struct CameraPreviewView: UIViewRepresentable {
         let view = UIView(frame: .zero)
         view.backgroundColor = .black
 
-        // Add camera preview layer
-        if let previewLayer = cameraManager.getPreviewLayer() {
-            previewLayer.frame = view.bounds
-            view.layer.addSublayer(previewLayer)
+        // Add camera preview layer - ensure main thread operations
+        DispatchQueue.main.async {
+            if let previewLayer = cameraManager.getPreviewLayer() {
+                previewLayer.frame = view.bounds
+                view.layer.addSublayer(previewLayer)
+            }
         }
 
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        // Update preview layer frame
-        if let previewLayer = cameraManager.getPreviewLayer() {
-            previewLayer.frame = uiView.bounds
+        // Update preview layer frame - ensure main thread operations
+        DispatchQueue.main.async {
+            if let previewLayer = cameraManager.getPreviewLayer() {
+                previewLayer.frame = uiView.bounds
+            }
         }
     }
 }

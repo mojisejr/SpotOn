@@ -134,10 +134,8 @@ class CameraManager: ObservableObject {
                 self.isInitialized = true
                 self.lastError = nil
 
-                // Start session
-                DispatchQueue.global(qos: .userInitiated).async {
-                    session.startRunning()
-                }
+                // Start session - CRITICAL: AVFoundation must run on main thread
+                session.startRunning()
             } else {
                 lastError = CameraError.configurationFailed
             }
