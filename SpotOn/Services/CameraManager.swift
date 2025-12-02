@@ -179,9 +179,11 @@ class CameraManager: ObservableObject {
                 }
                 print("🔍 [CameraManager.setupCaptureSession] Session configured successfully")
 
-                // Start session - CRITICAL: AVFoundation must run on main thread
-                print("🔍 [CameraManager.setupCaptureSession] Starting session - CRITICAL MAIN THREAD")
-                session.startRunning()
+                // Start session - OPTIMIZED: Start on background thread for better performance
+                print("🔍 [CameraManager.setupCaptureSession] Starting session - OPTIMIZED BACKGROUND THREAD")
+                await Task.detached(priority: .high) {
+                    session.startRunning()
+                }.value
                 print("🔍 [CameraManager.setupCaptureSession] Session started successfully")
             } else {
                 print("❌ [CameraManager.setupCaptureSession] Cannot add input/output to session")
