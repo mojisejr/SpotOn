@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import AVFoundation
 
 /// Detail view for individual spots showing timeline of log entries
 /// Features medical theme, chronological timeline display, and comprehensive medical data
@@ -18,8 +19,12 @@ struct SpotDetailView: View {
 
     /// Navigation path environment
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
 
-    /// State for showing Add Log Entry sheet
+    /// State for showing Camera overlay sheet
+    @State private var showingCamera = false
+
+    /// State for showing Add Log Entry sheet (fallback)
     @State private var showingAddLogEntry = false
 
     // MARK: - Medical Theme Colors
@@ -92,18 +97,35 @@ struct SpotDetailView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
-                        showingAddLogEntry = true
+                        showingCamera = true
                     }) {
-                        Image(systemName: "plus.circle.fill")
+                        Image(systemName: "camera.fill")
                             .font(.title2)
                             .foregroundColor(medicalBlue)
                     }
-                    .accessibilityLabel("Add Log Entry")
-                    .accessibilityHint("Create a new medical log entry for this spot")
+                    .accessibilityLabel("Take Photo")
+                    .accessibilityHint("Take a new photo with ghost overlay for consistent tracking")
                 }
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .sheet(isPresented: $showingCamera) {
+            CameraOverlayView(
+                spot: spot,
+                cameraManager: CameraManager(imageManager: ImageManager()),
+                imageManager: ImageManager(),
+                onPhotoCaptured: { image in
+                    // Photo captured and LogEntry will be created in CameraOverlayView
+                    print("Photo captured for spot: \(spot.title)")
+                },
+                onError: { error in
+                    print("Camera error: \(error.localizedDescription)")
+                },
+                onCancel: {
+                    showingCamera = false
+                }
+            )
+        }
         .sheet(isPresented: $showingAddLogEntry) {
             AddLogEntryView(spot: spot)
         }
