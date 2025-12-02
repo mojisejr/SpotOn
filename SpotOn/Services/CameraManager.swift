@@ -32,6 +32,7 @@ class CameraManager: ObservableObject {
     private var photoOutput: AVCapturePhotoOutput?
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private var photoCaptureCompletion: ((UIImage?, Error?) -> Void)?
+    private var activeCaptureDelegate: PhotoCaptureDelegate?
 
     // MARK: - Initialization
 
@@ -217,19 +218,20 @@ class CameraManager: ObservableObject {
             isCapturingPhoto = true
             lastError = nil
 
-            photoCaptureCompletion = { image, error in
+            photoCaptureCompletion = { [weak self] image, error in
                 DispatchQueue.main.async {
-                    self.isCapturingPhoto = false
+                    self?.isCapturingPhoto = false
+                    self?.activeCaptureDelegate = nil // Clear delegate reference
 
                     if let error = error {
-                        self.lastError = error
+                        self?.lastError = error
                         continuation.resume(throwing: error)
                     } else if let image = image {
-                        self.capturedImage = image
-                        self.lastError = nil
+                        self?.capturedImage = image
+                        self?.lastError = nil
                         continuation.resume()
                     } else {
-                        self.lastError = CameraError.captureFailed
+                        self?.lastError = CameraError.captureFailed
                         continuation.resume(throwing: CameraError.captureFailed)
                     }
                 }
@@ -246,7 +248,11 @@ class CameraManager: ObservableObject {
             }
 
             print("🔍 [CameraManager.capturePhoto] About to call photoOutput.capturePhoto")
-            photoOutput?.capturePhoto(with: settings, delegate: PhotoCaptureDelegate(completion: completion))
+            // Create and keep reference to delegate to prevent deallocation
+            let delegate = PhotoCaptureDelegate(completion: completion)
+            self.activeCaptureDelegate = delegate // Keep strong reference
+
+            photoOutput?.capturePhoto(with: settings, delegate: delegate)
             print("🔍 [CameraManager.capturePhoto] photoOutput.capturePhoto called successfully")
         }
     }
