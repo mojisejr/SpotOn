@@ -302,26 +302,47 @@ private struct CameraPreviewView: UIViewRepresentable {
     let cameraManager: CameraManager
 
     func makeUIView(context: Context) -> UIView {
+        print("🔍 [CameraPreviewView.makeUIView] Creating preview view")
         let view = UIView(frame: .zero)
         view.backgroundColor = .black
 
-        // Add camera preview layer - ensure main thread operations
-        DispatchQueue.main.async {
-            if let previewLayer = cameraManager.getPreviewLayer() {
-                previewLayer.frame = view.bounds
-                view.layer.addSublayer(previewLayer)
-            }
-        }
+        // Wait for camera to be initialized before adding preview layer
+        setupPreviewLayer(view: view)
 
         return view
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        // Update preview layer frame - ensure main thread operations
-        DispatchQueue.main.async {
-            if let previewLayer = cameraManager.getPreviewLayer() {
-                previewLayer.frame = uiView.bounds
+        print("🔍 [CameraPreviewView.updateUIView] Updating preview frame")
+        // Update preview layer frame
+        updatePreviewLayer(view: uiView)
+    }
+
+    private func setupPreviewLayer(view: UIView) {
+        // Small delay to ensure camera is fully initialized
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            guard let previewLayer = self.cameraManager.getPreviewLayer() else {
+                print("❌ [CameraPreviewView] No preview layer available")
+                return
             }
+
+            print("🔍 [CameraPreviewView] Setting up preview layer")
+            previewLayer.frame = view.bounds
+            previewLayer.videoGravity = .resizeAspectFill
+
+            // Remove old layers if any
+            view.layer.sublayers?.removeAll { $0 is AVCaptureVideoPreviewLayer }
+
+            view.layer.addSublayer(previewLayer)
+            print("✅ [CameraPreviewView] Preview layer added successfully")
+        }
+    }
+
+    private func updatePreviewLayer(view: UIView) {
+        guard let previewLayer = cameraManager.getPreviewLayer() else { return }
+
+        DispatchQueue.main.async {
+            previewLayer.frame = view.bounds
         }
     }
 }
